@@ -1,0 +1,1 @@
+This repository contains software used to test the Glados software system, both ground-side and flight-side.
