@@ -26,12 +26,11 @@ if __name__ == '__main__':
     scene.userzoom = 0
     scene.userspin = 0
     scene.ambient = 0
-    scene.range = (10,10,10)
-    scene.scale = (.1,.1,.1)
-    minmag=10
+    scene.range = 10
+    #scene.center = [1,0,0]
+    #scene.fov = math.radians(6)
 
-    # Size of the visible universe.
-    spacesize = 500
+    minmag=10
 
     # Fill outerspace with stars.
     radius = 1
@@ -41,11 +40,10 @@ if __name__ == '__main__':
 
     for line in starfile.readlines():
         temp=line.rstrip().split(",")
-        pos=[spacesize*1.5*math.cos(math.radians(float(temp[2])))*math.cos(math.radians(float(temp[3]))),spacesize*1.5*math.sin(math.radians(float(temp[2])))*math.cos(math.radians(float(temp[3]))),spacesize*1.5*math.sin(math.radians(float(temp[3])))]
+        pos=[math.cos(math.radians(float(temp[2])))*math.cos(math.radians(float(temp[3]))),math.sin(math.radians(float(temp[2])))*math.cos(math.radians(float(temp[3]))),math.sin(math.radians(float(temp[3])))]
         mag=math.pow(100,(minmag-float(temp[1]))/5-1)
-        print pos
-        print 
-        points(frame=outerspace, pos=pos, size=2, color=[mag,mag,mag])
+        points(frame=outerspace,pos=pos, size=2, color=[mag,mag,mag])
+        #print pos
     starfile.close()
 
  

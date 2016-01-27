@@ -1,0 +1,4 @@
+1 = Earth
+2 = Latitude/Longitude Lines
+3 = Spike of Density
+4 = Compiled Points
