@@ -10,4 +10,5 @@ for dec in list(numpy.arange(-90+decstep/2,90,decstep)):
 		x=math.cos(math.radians(ra))*math.cos(math.radians(dec))
 		y=math.sin(math.radians(ra))*math.cos(math.radians(dec))
 		z=math.sin(math.radians(dec))
-		print x,y,z,ra,dec
+		print x,y,z
+		#,ra,dec

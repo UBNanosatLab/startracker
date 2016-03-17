@@ -1,6 +1,13 @@
 import numpy
 import math
 import sys
+
+#this python file generates constelations based on what stars might be within a simulated field of view
+#the purpose of this is to make the database robust against cases where part of a constelation is cut off, but we still have enough stars to form another constelation
+#takes in 1 commandline argument. this is our minimum fov/2
+
+
+
 rad_err=math.radians(1.0/64.0)
 
 min_x=0
