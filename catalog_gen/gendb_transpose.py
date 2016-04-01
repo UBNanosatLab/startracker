@@ -24,7 +24,7 @@ def valid_permutation(perm):
 	return 1
 
 stardb={}
-starfile = open("catalog.dat")
+starfile = open("nearStars.dat")
 for line in starfile.readlines():
 	star=line.rstrip(' \t').split(",")
 	ra=float(star[2])
