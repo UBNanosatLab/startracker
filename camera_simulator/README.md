@@ -9,4 +9,4 @@ pip install pydispatcher pillow PyDispatcher PyVRML97 OpenGLContext`
 
 If using Windows download and install pygame *2.7.msi using the link below
 
-A [link](http://www.pygame.org/download.shtml)
+[Pygame *2.7.msi link](http://www.pygame.org/download.shtml)
