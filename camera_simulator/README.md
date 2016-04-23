@@ -10,6 +10,10 @@ Run this code
 `sudo pip install PyOpenGL PyOpenGL_accelerate "PyVRML97==2.3.0a4" simpleparse numpy "OpenGLContext==2.2.0a3"`  
 `sudo pip install pillow PyDispatcher PyVRML97 OpenGLContext`
 
+I you are using Linux run this code
+
+`sudo apt-get install python-pygame`  
+
 If you are using Windows you will need to do a few more steps  
 First download and install pygame *2.7.msi using the link below
 
