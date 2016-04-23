@@ -2,11 +2,12 @@ Setting up camera_simulator
 ---------------------------
 Run this code
 
-`sudo apt-get install python-pip`
+`sudo apt-get install python-pip`  
+`sudo apt-get install python-dev`
 
 ###Now run these 
 
-`sudo pip install PyOpenGL PyOpenGL_accelerate "PyVRML97==2.3.0a4" simpleparse numpy "OpenGLContext==2.2.0a3"` 
+`sudo pip install PyOpenGL PyOpenGL_accelerate "PyVRML97==2.3.0a4" simpleparse numpy "OpenGLContext==2.2.0a3"`  
 `sudo pip install pydispatcher pillow PyDispatcher PyVRML97 OpenGLContext`
 
 If you are using Windows you will need to do a few more steps  
