@@ -1,0 +1,42 @@
+!_TAG_FILE_FORMAT	2	/extended format; --format=1 will not append ;" to lines/
+!_TAG_FILE_SORTED	2	/0=unsorted, 1=sorted, 2=foldcase/
+!_TAG_PROGRAM_AUTHOR	Darren Hiebert	/dhiebert@users.sourceforge.net/
+!_TAG_PROGRAM_NAME	Exuberant Ctags	//
+!_TAG_PROGRAM_URL	http://ctags.sourceforge.net	/official site/
+!_TAG_PROGRAM_VERSION	5.9~svn20110310	//
+cat_lines	./beast.cpp	31;"	variable
+CC	./makefile	1;"	macro
+CFLAGS	./makefile	2;"	macro
+d	./beast.cpp	35;"	variable
+dec	./gendb.py	9;"	variable
+decll	./beast.cpp	15;"	member	struct:star	file:
+dist	./beast.cpp	19;"	member	struct:starline	file:
+dist	./gendb.py	26;"	variable
+dist_lines	./beast.cpp	32;"	variable
+initdb	./beast.cpp	37;"	function	signature:()
+length	./gendb.py	10;"	variable
+LIBS	./makefile	3;"	macro
+mag	./beast.cpp	13;"	member	struct:star	file:
+mag	./gendb.py	7;"	variable
+main	./beast.cpp	56;"	function	signature:(int argc, char** argv)
+maxdist	./gendb.py	5;"	variable
+max_thresh	./beast.cpp	53;"	variable
+operator ()	./beast.cpp	25;"	function	struct:sort_z	signature:(Point3f pt1, Point3f pt2)
+operator ()	./beast.cpp	28;"	function	struct:sort_dist	signature:(starline sl, double sd)
+ra	./beast.cpp	14;"	member	struct:star	file:
+ra	./gendb.py	8;"	variable
+s	./beast.cpp	34;"	variable
+s1	./beast.cpp	20;"	member	struct:starline	file:
+s2	./beast.cpp	21;"	member	struct:starline	file:
+sort_dist	./beast.cpp	27;"	struct	file:
+sort_z	./beast.cpp	24;"	struct	file:
+src	./beast.cpp	51;"	variable
+src_gray	./beast.cpp	51;"	variable
+star	./beast.cpp	12;"	struct	file:
+star	./gendb.py	14;"	variable
+starfile	./gendb.py	12;"	variable
+starline	./beast.cpp	18;"	struct	file:
+thresh	./beast.cpp	52;"	variable
+xdot	./gendb.py	23;"	variable
+ydot	./gendb.py	24;"	variable
+zdot	./gendb.py	25;"	variable

@@ -1,0 +1,3 @@
+#!/bin/bash
+cd "/home/andrew/software-testing/beast"
+gdb "$@" --args beast polaris-1s-gain38-4.bmp
