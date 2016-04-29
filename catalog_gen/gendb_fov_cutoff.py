@@ -26,7 +26,7 @@ def distance_min(sort_star):
 
 #load our star catalog, converting from id,ra,dec to x,y,z,id
 stardb={}
-starfile = open("nearStars.dat")
+starfile = open("/dev/stdin")
 for line in starfile.readlines():
 	star=line.rstrip(' \t').split(",")
 	ra=float(star[2])
