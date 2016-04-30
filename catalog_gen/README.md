@@ -15,7 +15,7 @@ output:
 
 ###gendb_brightness.py
 input:
-- constelation database where stars are arranges by distance from the first star
+- constelation database where stars are arranged by distance from the first star
 - maximum acceptable error in star magnitude
 
 output:
