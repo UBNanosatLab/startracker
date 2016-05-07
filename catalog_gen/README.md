@@ -54,3 +54,5 @@ input:
 output:
 - 3 csv files containing the distribution of raw star lookup parameters - info/param[1-3].csv
 - 3 csv files containing the distribution of wrapped star lookup parameters - info/param[1-3]_wrapped.csv
+
+To compile beastgen, you need to do sudo apt-get install g++-multilib 
