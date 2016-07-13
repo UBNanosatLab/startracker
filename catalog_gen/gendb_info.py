@@ -43,6 +43,9 @@ for line in starfile.readlines():
 	newline.append(str(3600*math.degrees(math.acos(cos1))))
 	newline.append(str(3600*math.degrees(math.acos(cos2))))
 	newline.append(str(3600*math.degrees(math.acos(cos3))))
+	newline.append(str(3600*math.degrees(math.acos(cos4))))
+	newline.append(str(3600*math.degrees(math.acos(cos5))))
+	newline.append(str(3600*math.degrees(math.acos(cos6))))
 		
 	print ",".join(newline)
 #print rad_err

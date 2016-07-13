@@ -1,4 +1,7 @@
 #!/bin/sh
+MIN_MAG="8.0"
+NOISE_MAG="9.0"
+
 EXT="`echo \"$@\" | grep -o [^\.]*$`"
 cp "$@" calibration/image.$EXT
 cd calibration
@@ -7,4 +10,6 @@ grep "^RMS error" image.txt | tail -n 1 | grep -o "[0-9].*[0-9]"| sed 's/^/ARC_E
 grep -o "image size.*" image.txt| tail -n 1 | grep -o "[0-9].*[0-9]"| sed 's/^/IMG_X=/;s/ x /\nIMG_Y=/' >> calibration.txt
 grep -o "^Pixel scale.*" image.txt| tail -n 1 | grep -o "[0-9].*[0-9]"| sed 's/^/ARC_PER_PIX=/' >> calibration.txt
 grep -o "^Field size:.*" image.txt | tail -n 1 | grep -o "[0-9].*[0-9]"| sed 's/^/DEG_X=/;s/ x /\nDEG_Y=/' >> calibration.txt
+echo "MIN_MAG=$MIN_MAG" >> calibration.txt
+echo "NOISE_MAG=$NOISE_MAG" >> calibration.txt
 rm image.*

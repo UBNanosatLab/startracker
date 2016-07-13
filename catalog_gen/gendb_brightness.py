@@ -3,25 +3,25 @@ import math
 import itertools
 import sys
 
-brightness_err=float(sys.argv[1])
+I_minmag=pow(10,float(sys.argv[1])/-2.5)
 
 def valid_permutation(perm):
-	global brightness_err
+	global I_minmag
+	global stardb
 	for i in range(1,len(perm)):
-		if (stardb[int(perm[i-1])][0]>(stardb[int(perm[i])][0]+brightness_err)):
+		#if star i-1 at its absolute brightest is brighter than star i at its least bright, we are good
+		maxmag=-2.5*math.log10(I_minmag+pow(10,stardb[int(perm[i-1])][0]/-2.5))
+		minmag=stardb[int(perm[i])][1]
+		if (maxmag<minmag):
 			return 0
 	return 1
 
 stardb={}
-starfile = open("nearStars.dat")
+starfile = open("catalogRemoved.dat")
 for line in starfile.readlines():
 	star=line.rstrip(' \t').split(",")
-	#ra=float(star[2])
-	#dec=float(star[3])
-	#x=math.cos(math.radians(ra))*math.cos(math.radians(dec))
-	#y=math.sin(math.radians(ra))*math.cos(math.radians(dec))
-	#z=math.sin(math.radians(dec))
-	stardb[int(star[0])]=[float(star[1]),int(star[0])]
+	#[max,min,id]
+	stardb[int(star[0])]=[float(star[4]),float(star[4]),int(star[0])]
 
 starfile = open("/dev/stdin")
 for line in starfile.readlines():

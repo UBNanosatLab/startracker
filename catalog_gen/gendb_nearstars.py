@@ -1,9 +1,12 @@
 import csv
 import math
+import sys
+
 #Takes in a catalog of stars with ID, Right Ascension and Declination
-#Outputs catalog with three closest(or more if within 1/64 of degree of distance of third closest star) stars appended to each star entry
+#Outputs catalog with three closest(or more if within 4x star position error of third closest star) stars appended to each star entry
 #Sample output Looks like: ID, RA, DEC, closestStarId1, closestStarId2, closestStarId3(and more if within error)
 def nearestStars(inputText, outputText):
+    distance_err=float(sys.argv[1])*4./3600.
     outFile = open(outputText, "w")
     with open(inputText) as csvfile:
         reader = csv.reader(csvfile)
@@ -61,7 +64,7 @@ def nearestStars(inputText, outputText):
         closestDistanceList = [closestStarDistance, secondClosestStarDistance, thirdClosestDistance]
         closestIDList = [closestStarID, secondClosestStarID, thirdClosestStarID]
 
-        #Looks through every star in catologue and determines if it is within 1/64 + degress of third farthest star
+        #Looks through every star in catologue and determines if it is within 4x star position error of the third farthest star
         #If it is, it is appended to the closestIDList
         for starCandidate in cat:
             ra1 = float(star[2])
@@ -73,7 +76,7 @@ def nearestStars(inputText, outputText):
             if starCandidate[0] in closestIDList:
                 break;
             else:
-                if dis <=float(closestDistanceList[2]) + 1/64:
+                if dis <=float(closestDistanceList[2]) + distance_err:
                     closestIDList.append(starCandidate[0])
         line = star[0] + "," + star[1] + "," + star[2] + "," + star[3] + ","
 

@@ -28,14 +28,10 @@ long_line_behaviour=1
 long_line_column=72
 
 [files]
-current_page=0
-FILE_NAME_0=1720;C++;0;EUTF-8;1;1;0;%2Fhome%2Fandrew%2Fsoftware-testing%2Fbeast%2Fbeast.cpp;0;4
-FILE_NAME_1=69;Sh;0;EUTF-8;1;1;0;%2Fhome%2Fandrew%2Fsoftware-testing%2Fbeast%2Fdebug;0;4
-FILE_NAME_2=107;Python;0;EUTF-8;1;1;0;%2Fhome%2Fandrew%2Fsoftware-testing%2Fbeast%2Fgendb.py;0;4
-FILE_NAME_3=30903;C++;0;EUTF-8;1;1;0;%2Fusr%2Finclude%2Fc%2B%2B%2F4.8%2Fbits%2Fstl_vector.h;0;4
+current_page=-1
 
 [VTE]
-last_dir=/home/andrew/ops-class.org/os161
+last_dir=/home/ubuntu/adaptive
 
 [build-menu]
 EX_00_LB=_Execute

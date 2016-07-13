@@ -8,7 +8,7 @@ import sys
 
 
 
-rad_err=math.radians(1.0/64.0)
+rad_err=math.radians(float(sys.argv[2])*4./3600.)
 
 center_star_x=0
 center_star_y=0
@@ -42,7 +42,7 @@ for line in starfile.readlines():
 #with the constraint that the space between each point may be no more than fov/2
 #the idea is we are simulating the process of pointing our camera at every possible region of sky
 
-maxstep=float(sys.argv[1])
+maxstep=float(sys.argv[1])/2.0
 step=maxstep/math.sqrt(2)
 decstep=180/math.floor(180/step)
 for dec in list(numpy.arange(-90+decstep/2,90,decstep)):
