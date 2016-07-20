@@ -33,19 +33,17 @@ for line in starfile.readlines():
 	cos5=dot(s[1],s[3])
 	cos6=dot(s[2],s[3])
 	
-	
-	#newline.append(s[0])
-	#newline.append(s[1])
-	#newline.append(s[2])
-	#newline.append(s[3])
-	
-	
 	newline.append(str(3600*math.degrees(math.acos(cos1))))
 	newline.append(str(3600*math.degrees(math.acos(cos2))))
 	newline.append(str(3600*math.degrees(math.acos(cos3))))
 	newline.append(str(3600*math.degrees(math.acos(cos4))))
 	newline.append(str(3600*math.degrees(math.acos(cos5))))
 	newline.append(str(3600*math.degrees(math.acos(cos6))))
+	
+	newline.append(s[0])
+	newline.append(s[1])
+	newline.append(s[2])
+	newline.append(s[3])
 		
-	print ",".join(newline)
+	print " ".join(newline)
 #print rad_err
