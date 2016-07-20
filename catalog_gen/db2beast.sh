@@ -15,10 +15,11 @@ echo NUMCONST=$NUMCONST>>calibration/dbsize.txt
 echo $PARAM1 $PARAM2 $PARAM3 $NUMCONST
 
 #using a blocksize of 2 gives a factor of 8 improvement in space usage (each is an ofset from the base)
-LUTSIZE=($PARAM1/2)*($PARAM2/2)*($PARAM3/2)*4
+LUTSIZE=$[($PARAM1/2)*($PARAM2/2)*($PARAM3/2)*4]
 #we have 6 parameters for verification, each stored as a double
-PARAMSIZE=$NUMCONST*(8*6)
+PARAMSIZE=$[$NUMCONST*(8*6)]
 #4 integers to hold the star ids, and 1 pointer ofset from the base to the next location
 echo $[(4*5)/(1024*1024)] MB
 
-./beastgen $PARAM1 $PARAM2 $PARAM3 $NUMCONST
+#./beastgen $PARAM1 $PARAM2 $PARAM3 $NUMCONST
+echo "./beastgen $PARAM1 $PARAM2 $PARAM3 $NUMCONST"
