@@ -21,5 +21,5 @@ PARAMSIZE=$[$NUMCONST*(8*6+4*5)]
 #4 integers to hold the star ids, and 1 pointer ofset from the base to the next location
 echo $[($LUTSIZE+$PARAMSIZE)/(1024*1024)] MB
 
-#./beastgen $PARAM1 $PARAM2 $PARAM3 $NUMCONST
-echo "./beastgen $PARAM1 $PARAM2 $PARAM3 $NUMCONST"
+#./beastgen $PARAM1 $PARAM2 $PARAM3 $NUMCONST $ARC_ERR <info/starline.txt
+echo "./beastgen $PARAM1 $PARAM2 $PARAM3 $NUMCONST $ARC_ERR < info/starline.txt"
