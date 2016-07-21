@@ -1,2 +1,2 @@
 #!/bin/bash
-./beast
+./beastgen 453 453 459 6447 6.6902 < info/starline.txt
