@@ -12,14 +12,21 @@ echo PARAM1=$PARAM1>calibration/dbsize.txt
 echo PARAM2=$PARAM2>>calibration/dbsize.txt
 echo PARAM3=$PARAM3>>calibration/dbsize.txt
 echo NUMCONST=$NUMCONST>>calibration/dbsize.txt
-echo $PARAM1 $PARAM2 $PARAM3 $NUMCONST
 
-#using a blocksize of 2 gives a factor of 8 improvement in space usage (each is an ofset from the base)
+cat calibration/dbsize.txt
+#using a blocksize of 2 gives a factor of 8 improvement in space usage (each is an offset from the base)
 LUTSIZE=$[($PARAM1/2)*($PARAM2/2)*($PARAM3/2)*4]
 #we have 6 parameters for verification, each stored as a double
-PARAMSIZE=$[$NUMCONST*(8*6+4*5)]
+#struct adds a random extra 4 bits because reasons :-(
+PARAMSIZE=$[$NUMCONST*(8*6+4*5+4)]
 #4 integers to hold the star ids, and 1 pointer ofset from the base to the next location
-echo $[($LUTSIZE+$PARAMSIZE)/(1024*1024)] MB
+echo -n "calulated size:  "
+echo "$[($LUTSIZE+$PARAMSIZE)] beastdb.bin"
 
-#./beastgen $PARAM1 $PARAM2 $PARAM3 $NUMCONST $ARC_ERR <info/starline.txt
-echo "./beastgen $PARAM1 $PARAM2 $PARAM3 $NUMCONST $ARC_ERR < info/starline.txt"
+#const. size should be 64 (why?)
+./beastgen
+echo -n "actual size:     "
+wc -c beastdb.bin
+gzip -f beastdb.bin
+echo -n "conpressed size: "
+wc -c beastdb.bin.gz
