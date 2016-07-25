@@ -3,7 +3,7 @@ import math
 import itertools
 import sys
 
-rad_err=math.radians(float(sys.argv[1])*4./3600.)
+rad_err=math.radians(float(sys.argv[1])*2./3600.)
 first_star=-1
 #return distance from first star
 def dffs(curr_star):

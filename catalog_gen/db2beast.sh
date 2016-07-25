@@ -27,6 +27,6 @@ echo "$[($LUTSIZE+$PARAMSIZE)] beastdb.bin"
 ./beastgen
 echo -n "actual size:     "
 wc -c beastdb.bin
-gzip -f beastdb.bin
-echo -n "conpressed size: "
-wc -c beastdb.bin.gz
+#gzip -f beastdb.bin
+#echo -n "conpressed size: "
+#wc -c beastdb.bin.gz

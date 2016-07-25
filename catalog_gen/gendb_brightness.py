@@ -12,7 +12,7 @@ def valid_permutation(perm):
 		#if star i-1 at its absolute brightest is brighter than star i at its least bright, we are good
 		maxmag=-2.5*math.log10(I_minmag+pow(10,stardb[int(perm[i-1])][0]/-2.5))
 		minmag=stardb[int(perm[i])][1]
-		if (maxmag<minmag):
+		if (maxmag>minmag):
 			return 0
 	return 1
 

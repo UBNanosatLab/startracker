@@ -26,6 +26,7 @@ void add_entry(int mapidx,int curr_const) {
 }
 
 int main (int argc, char** argv) {
+	std::cout.precision(12);
 	//load config
 	configuration::data config1;
 	std::ifstream cfgfile1("calibration/dbsize.txt");
@@ -85,13 +86,13 @@ int main (int argc, char** argv) {
 	// Now the file is ready to be mmapped.
 
 	map = (int*)mmap(0, dbsize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-	starptr=(struct constellation*)(&map[mapsize]);
 	if (map == MAP_FAILED)
 	{
 		close(fd);
 		perror("Error mmapping the file");
 		exit(EXIT_FAILURE);
 	}
+	starptr=(struct constellation*)(&map[mapsize]);
 	memset(map, -1, dbsize);
 	for (int curr_const=0;curr_const<NUMCONST;curr_const++){
 		for (int i=0;i<6;i++) starline>>starptr[curr_const].p[i];
@@ -121,7 +122,17 @@ int main (int argc, char** argv) {
 		int i3_u=((i3)%i3_max);
 		if (i3_l<0) i3_l+=i3_max;
 		if (i3_u<0) i3_u+=i3_max;
-
+		
+		//std::cout<<i1_l/(i2_max*i3_max)<<" "<<i2_l/(i3_max)<<" "<<i3_l<<std::endl<<std::flush;
+		//std::cout<<i1_u/(i2_max*i3_max)<<" "<<i2_l/(i3_max)<<" "<<i3_l<<std::endl<<std::flush;
+		//std::cout<<i1_l/(i2_max*i3_max)<<" "<<i2_u/(i3_max)<<" "<<i3_l<<std::endl<<std::flush;
+		//std::cout<<i1_u/(i2_max*i3_max)<<" "<<i2_u/(i3_max)<<" "<<i3_l<<std::endl<<std::flush;
+		//std::cout<<i1_l/(i2_max*i3_max)<<" "<<i2_l/(i3_max)<<" "<<i3_u<<std::endl<<std::flush;
+		//std::cout<<i1_u/(i2_max*i3_max)<<" "<<i2_l/(i3_max)<<" "<<i3_u<<std::endl<<std::flush;
+		//std::cout<<i1_l/(i2_max*i3_max)<<" "<<i2_u/(i3_max)<<" "<<i3_u<<std::endl<<std::flush;
+		//std::cout<<i1_u/(i2_max*i3_max)<<" "<<i2_u/(i3_max)<<" "<<i3_u<<std::endl<<std::flush;
+		//std::cout<<"--"<<std::endl<<std::flush;
+		
 		add_entry(i1_l+i2_l+i3_l,curr_const);
 		add_entry(i1_u+i2_l+i3_l,curr_const);
 		add_entry(i1_l+i2_u+i3_l,curr_const);
