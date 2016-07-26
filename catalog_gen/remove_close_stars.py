@@ -8,32 +8,6 @@ import sys
 
 distance_err=float(sys.argv[1])*4./3600.
 
-def distance_sort(inputText, outputText):
-    outFile = open(outputText, "w")
-    with open(inputText) as csvfile:
-        reader = csv.reader(csvfile)
-        cat = list(reader)
-    count = 0
-    matchCount = 0
-    for item in cat:
-        foundValue = False
-        if(count%100 == 0):
-            print(str(count) + "/" +str(len(cat)) + " | {0:.2f}".format(count/len(cat) *100) + " %" + " Matches " + str(matchCount))
-        count = count+1
-        for item2 in cat:
-            ra1 = float(item[2])
-            ra2 = float(item2[2])
-            dec1 = float(item[3])
-            dec2 = float(item2[3])
-            if(math.fabs(distance(ra1, dec1, ra2, dec2)) <=distance_err):
-                matchCount = matchCount + 1
-                print("match at " + item[0])
-                foundValue = True
-                break
-        if(foundValue == False):
-            newLine = item[0] + "," + item[1] + "," + item[2] + "," + item[3] + "," + item[4] + "," + item[5] + "\n"
-            outFile.write(newLine)
-
 def distance(ra1,dec1,ra2,dec2):
     if(ra1 == ra2 and dec1 == dec2):
         return 9999
@@ -44,10 +18,24 @@ def distance(ra1,dec1,ra2,dec2):
         x2=math.cos(math.radians(ra2))*math.cos(math.radians(dec2))
         y2=math.sin(math.radians(ra2))*math.cos(math.radians(dec2))
         z2=math.sin(math.radians(dec2))
-        print(math.degrees(math.acos(x1*x2+y1*y2+z1*z2)))
         return math.degrees(math.acos(x1*x2+y1*y2+z1*z2))
 
-inputFile = "catalog.dat"
-outputFile = "catalogRemoved.dat"
-
-distance_sort(inputFile, outputFile)
+with open("/dev/stdin") as csvfile:
+    reader = csv.reader(csvfile)
+    cat = list(reader)
+count = 0
+matchCount = 0
+for item in cat:
+    foundValue = False
+    count = count+1
+    for item2 in cat:
+        ra1 = float(item[2])
+        ra2 = float(item2[2])
+        dec1 = float(item[3])
+        dec2 = float(item2[3])
+        if(math.fabs(distance(ra1, dec1, ra2, dec2)) <=distance_err):
+            matchCount = matchCount + 1
+            foundValue = True
+            break
+    if(foundValue == False):
+        print item[0] + ","+item[1] + "," + item[2] + "," + item[3] + "," + item[4] + "," + item[5]

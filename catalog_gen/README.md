@@ -38,7 +38,7 @@
 #####output:
 - constelationdb.dat: a constelation database in which stars are sorted by brightness
 
-###stardist.py
+###gendb_info.py
 #####input:
 - nearStars.dat
 - output of nearstars2db.sh
