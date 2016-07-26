@@ -3,10 +3,10 @@ import math
 import sys
 
 #Takes in a catalog of stars with ID, Right Ascension and Declination
-#Outputs catalog with three closest(or more if within 4x star position error of third closest star) stars appended to each star entry
+#Outputs catalog with three closest(or more if within 2x star position error of third closest star) stars appended to each star entry
 #Sample output Looks like: ID, RA, DEC, closestStarId1, closestStarId2, closestStarId3(and more if within error)
 def nearestStars(inputText, outputText):
-    distance_err=float(sys.argv[1])*4./3600.
+    distance_err=float(sys.argv[1])*2./3600.
     outFile = open(outputText, "w")
     with open(inputText) as csvfile:
         reader = csv.reader(csvfile)
