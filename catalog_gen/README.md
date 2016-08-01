@@ -1,8 +1,8 @@
 #Workflow:
 1. Edit MIN_MAG & NOISE_MAG in calibrate.sh
 2. Run ./calibrate.sh samplefield.png
-3. Run ./hip2nearstars.sh
-4. Run ./nearstars2db.sh
+3. Run ./hip2cat.sh
+4. Run ./cat2db.sh
 5. Run ./db2beast.sh
 
 
