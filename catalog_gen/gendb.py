@@ -23,15 +23,21 @@ def getstardb(filename="catalog.dat"):
 	stardb={}
 	starfile = open(filename)
 	for line in starfile.readlines():
-		star=line.split()
-		stardb[int(star[0])]=star
+		fields=line.split()
+		HIP_ID=int(fields[0]);
+		MAG=float(fields[1]);
+		DEC=float(fields[2]);
+		RA=float(fields[3]);
+		X=float(fields[4]);
+		Y=float(fields[5]);
+		Z=float(fields[6]);
+		MAX_BRIGHTNESS=float(fields[7]);
+		MIN_BRIGHTNESS=float(fields[8]);
+		stardb[HIP_ID]=[HIP_ID,MAG,DEC,RA,X,Y,Z,MAX_BRIGHTNESS,MIN_BRIGHTNESS]
 	return stardb
 	
 stardb=getstardb()
 
-def getstarxyz(sd):
-	return np.array([[math.cos(math.radians(float(i[2])))*math.cos(math.radians(float(i[3]))),math.sin(math.radians(float(i[2])))*math.cos(math.radians(float(i[3]))),math.sin(math.radians(float(i[3])))] for i in sd])
-	
 #generate a list of coordinates which covers the sky completely
 #with the constraint that the space between each point may be no more than fov/2
 #the idea is we are simulating the process of pointing our camera at every possible region of sky
@@ -54,21 +60,20 @@ def searchxyz(starxyz,points,radius=fovradius):
 	pts = spatial.cKDTree(points)
 	return pts.query_ball_tree(xyz,2*abs(math.sin(math.radians(radius)/2)))
 
-def filtermagnitude(mag):
+def filtermagnitude(minmag=MIN_MAG):
 	global stardb
-	sd=stardb.values()
-	xyz=getstarxyz(sd)
+	sd=np.array(stardb.values(),dtype = object)
 	for i in sd:
-		if float(i[1])>mag:
-			del stardb[int(i[0])]
+		if i[1]>minmag:
+			del stardb[i[0]]
 
-def filterdoublestars(r):
+def filterdoublestars(r=ARC_PER_PIX*4):
 	global stardb
-	sd=stardb.values()
-	xyz=getstarxyz(sd)
+	sd=np.array(stardb.values(),dtype = object)
+	xyz=np.array(sd[:,4:7].tolist(),dtype=float)
 	for i in searchxyz(xyz,xyz,r/3600.):
 		for j in range(1,len(i)):
-			k=int(sd[i[j]][0])
+			k=sd[i[j]][0]
 			if k in stardb:
 				del stardb[k]
 	
@@ -76,33 +81,33 @@ def nearstars():
 	global fovradius
 	global ARC_ERR
 	global stardb
-	sd=stardb.values()
+	sd=np.array(stardb.values(),dtype = object)
 	err=ARC_ERR*2./3600.
-	xyz=getstarxyz(sd)
+	xyz=np.array(sd[:,4:7].tolist(),dtype=float)
 	result=searchxyz(xyz,xyz,fovradius)
 	starlist=[]
 	for i in range(0,len(xyz)):
 		if len(result[i])>3:
-			dist=[math.degrees(math.acos(j)) for j in np.clip(np.sum(xyz[i]*xyz[result[i]],1),a_min=-1,a_max=1)]
+			dist=np.degrees(np.arccos(np.clip(np.sum(xyz[i]*xyz[result[i]],1),a_min=-1,a_max=1)))
 			maxsize=heapq.nsmallest(4,dist)[-1]+err
-			starlist.append([int(sd[result[i][j]][0]) for j in range(0,len(dist)) if dist[j]<maxsize])
+			starlist.append([sd[result[i][j]][0] for j in range(0,len(dist)) if dist[j]<maxsize])
 	return starlist
 
 def fovstars():
 	global fovradius
 	global ARC_ERR
 	global stardb
-	sd=stardb.values()
+	sd=np.array(stardb.values(),dtype = object)
 	err=ARC_ERR*2./3600.
-	xyz=getstarxyz(sd)
+	xyz=np.array(sd[:,4:7].tolist(),dtype=float)
 	fovxyz=getglobe()
 	result=searchxyz(xyz,fovxyz,fovradius)
 	starlist=[]
 	for i in range(0,len(fovxyz)):
 		if len(result[i])>3:
-			dist=[math.degrees(math.acos(j)) for j in np.clip(np.sum(fovxyz[i]*xyz[result[i]],1),a_min=-1,a_max=1)]
+			dist=np.degrees(np.arccos(np.clip(np.sum(fovxyz[i]*xyz[result[i]],1),a_min=-1,a_max=1)))
 			minidx=np.argmin(dist)
-			dist=[math.degrees(math.acos(j)) for j in np.clip(np.sum(xyz[minidx]*xyz[result[i]],1),a_min=-1,a_max=1)]
+			dist=np.degrees(np.arccos(np.clip(np.sum(xyz[i]*xyz[result[i]],1),a_min=-1,a_max=1)))
 			maxsize=heapq.nsmallest(4,dist)[-1]+err
 			starlist.append([int(sd[result[i][j]][0]) for j in range(0,len(dist)) if dist[j]<maxsize])
 	return starlist
@@ -110,24 +115,29 @@ def fovstars():
 #this function takes in a sorted list, a key function and an error, and returns 
 #an iterator to every posible permutation of the list which is sorted to within +/- err
 #example: sorted_perms(sorted([3,2,1],key=vp),vp,1):
-def sorted_perms(sl,perm_key,err):
-    if len(sl) <=1:
-        yield sl
-    else:
-        for perm in sorted_perms(sl[1:],perm_key,err):
-			yield sl[0:1] + perm[:]
-			for i in range(1,len(perm)+1):
-				if perm_key(perm[i-1])<=perm_key(sl[0])+err:
-					yield perm[:i] + sl[0:1] + perm[i:]
-				else:
-					break
+
+def star_permutations(stars,key_func=lambda x: x,err=0):
+	assert(len(stars>3))
+	def sp(sl):
+		if len(sl) <=1:
+			yield sl
+		else:
+			for perm in sp(sl[1:]):
+				yield sl[0:1] + perm[:]
+				for i in range(1,len(perm)+1):
+					if key_func(perm[i-1])<=key_func(sl[0])+err:
+						yield perm[:i] + sl[0:1] + perm[i:]
+					else:
+						break
+	return [[i[0],i[1],i[2],i[3]] for i in sp(sorted(stars,key=key_func))]
 
 def sort_uniq(sequence):
     return itertools.imap(operator.itemgetter(0),itertools.groupby(sorted(sequence)))
 
+
 #only do this part if we were run as a python script
 if __name__ == '__main__':
-	filtermagnitude(MIN_BRIGHT)
-	filterdoublestars(ARC_PER_PIX*4)
+	filterdoublestars()
+	filtermagnitude()
 	for i in sort_uniq(fovstars()+nearstars()):
 		print [stardb[j][5] for j in i]
