@@ -127,7 +127,7 @@ def sort_uniq(sequence):
 
 #only do this part if we were run as a python script
 if __name__ == '__main__':
-	filtermagnitude(MIN_MAG)
+	filtermagnitude(MIN_BRIGHT)
 	filterdoublestars(ARC_PER_PIX*4)
 	for i in sort_uniq(fovstars()+nearstars()):
 		print [stardb[j][5] for j in i]

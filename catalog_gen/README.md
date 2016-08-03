@@ -1,5 +1,5 @@
 #Workflow:
-1. Edit MIN_MAG & NOISE_MAG in calibrate.sh
+1. Edit MIN_BRIGHT & NOISE_BRIGHT in calibrate.sh (10^(magnitude/-2.5))
 2. Run ./calibrate.sh samplefield.png
 3. Run ./hip2cat.sh
 4. Run ./cat2db.sh
