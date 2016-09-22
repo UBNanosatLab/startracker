@@ -1,51 +1,24 @@
-import numpy
-import math
-import sys
+import os, sys
+sys.path.append('../catalog_gen/')
+os.chdir('../catalog_gen/')
 
-execfile("../catalog_gen/calibration/calibration.txt")
-execfile("../catalog_gen/calibration/dbsize.txt")
-#load our star catalog, converting from id,ra,dec to x,y,z,id
-stardb={}
-starfile = open("../catalog_gen/catalog.dat")
-for line in starfile.readlines():
-	star=line.rstrip(' \t').split(",")
-	ra=float(star[2])
-	dec=float(star[3])
-	x=math.cos(math.radians(ra))*math.cos(math.radians(dec))
-	y=math.sin(math.radians(ra))*math.cos(math.radians(dec))
-	z=math.sin(math.radians(dec))
-	stardb[int(star[0])]=[x,y,z,float(star[1]),int(star[0])]
+from gendb import *
 
+filterunreliable()
+filtermagnitude()
+filterdoublestars()
 
+ra=0.0
+dec=0.0
 
-#generate a list of coordinates which covers the sky completely
-#with the constraint that the space between each point may be no more than fov/2
-#the idea is we are simulating the process of pointing our camera at every possible region of sky
+x=math.cos(math.radians(ra))*math.cos(math.radians(dec))
+y=math.sin(math.radians(ra))*math.cos(math.radians(dec))
+z=math.sin(math.radians(dec))
 
-maxstep=DEG_Y/2.0
-ra=0
-dec=0
-
-mindist=1000
-starlist=[]
-sl_idx=0
-minidx=-1
-fx=math.cos(math.radians(ra))*math.cos(math.radians(dec))
-fy=math.sin(math.radians(ra))*math.cos(math.radians(dec))
-fz=math.sin(math.radians(dec))
-#iterate through the list of stars. 
-for starid in stardb:
-	xdot=stardb[starid][0]*fx
-	ydot=stardb[starid][1]*fy
-	zdot=stardb[starid][2]*fz
-	dist=math.degrees(math.acos(xdot+ydot+zdot))
-	#if it is within or field of view, add it to starlist
-	if dist<maxstep:
-		x=stardb[starid][0]
-		y=stardb[starid][1]
-		z=stardb[starid][2]
-		px=(IMG_X/2)*(1+(y/x)/math.tan(DEG_X*math.pi/(180*2)))
-		py=(IMG_Y/2)*(1-(z/x)/math.tan(DEG_Y*math.pi/(180*2)))
-		print px,py,stardb[starid][3]
-
-#print x,y,z,ra,dec
+sd=np.array(stardb.values(),dtype = object)
+xyz = spatial.cKDTree(np.array(sd[:,4:7].tolist(),dtype=float))
+result=sd[xyz.query_ball_point([x,y,z],2*abs(math.sin(math.radians(fovradius)/2)))]
+result[:,5:6]=(IMG_X/2)*(1+(result[:,5:6]/result[:,4:5])/np.tan(DEG_X*np.pi/(180*2)))
+result[:,6:7]=(IMG_Y/2)*(1-(result[:,6:7]/result[:,4:5])/np.tan(DEG_Y*np.pi/(180*2)))
+for i in result:
+	print i[5],i[6],i[7]

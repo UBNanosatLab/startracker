@@ -17,11 +17,11 @@
 
 /* //mapping between px,py and x,y,z
  * 
- * //px-IMG_X/2=(x/z)IMG_Y/(2*tan(DEG_X*pi/(180*2)))
- * //IMG_Y/2-py=(y/z)IMG_Y/(2*tan(DEG_X*pi/(180*2)))
+ * //px-IMG_X/2=(x/z)IMG_X/(2*tan(DEG_X*pi/(180*2)))
+ * //IMG_Y/2-py=(y/z)IMG_Y/(2*tan(DEG_Y*pi/(180*2)))
  * 
  * //px=IMG_X/2(1+(x/z)/tan(DEG_X*pi/(180*2)))
- * //py=IMG_Y/2(1-(y/z)/tan(DEG_X*pi/(180*2)))
+ * //py=IMG_Y/2(1-(y/z)/tan(DEG_Y*pi/(180*2)))
  * 
  * //(2*px/IMG_X-1)=(x/z)/tan(DEG_X*pi/(180*2))
  * //(2*py/IMG_Y-1)=-(y/z)/tan(DEG_Y*pi/(180*2))
@@ -128,12 +128,12 @@ namespace beast {
 		close(fd);
 	}
 
-	bool compare_mag (const star &s1, const star &s2) {return (s1.mag < s2.mag);}
+	bool compare_mag (const star &s1, const star &s2) {return (s1.mag > s2.mag);}
 	bool compare_starnum (const star &s1, const star &s2) {return (s1.starnum < s2.starnum);}
 	class star_query {
 	public:
 		std::vector<star> stars;
-		int pivotstar;
+		int pilot;
 		void add_star(double px, double py, double mag) {
 			star s;
 			double j=(2*px/IMG_X-1)*tan(DEG_X*PI/(180*2)); //j=(x/z)
@@ -145,18 +145,18 @@ namespace beast {
 			s.starnum=stars.size();
 			s.magnum=s.starnum;
 			s.hipid=0;
-			if (s.magnum==0) pivotstar=0;
 			px=(IMG_X/2)*(1+(s.y/s.x)/tan(DEG_X*PI/(180*2)));
 			py=(IMG_Y/2)*(1-(s.z/s.x)/tan(DEG_Y*PI/(180*2)));
 			
 			//insert into list sorted by magnitude
 			for (;s.magnum>0&&compare_mag(s,stars[s.magnum-1]);s.magnum--);
-			if (s.magnum<=pivotstar) pivotstar++;
+			if (s.starnum==0) pilot=0;
+			else if (s.magnum<=pilot) pilot++;
 			stars.insert(stars.begin()+s.magnum,s);
 		}
 		void sort_mag() {sort(stars.begin(), stars.end(), compare_mag);}
 		void sort_starnum() {sort(stars.begin(), stars.end(), compare_starnum);}
-		void querydb(int a, int b, int c, int d) {
+		bool querydb(int a, int b, int c, int d) {
 			double p0,p1,p2,p3,p4,p5;
 			p0=(3600*180.0/PI)*acos(stars[a].x*stars[b].x+stars[a].y*stars[b].y+stars[a].z*stars[b].z);
 			p1=(3600*180.0/PI)*acos(stars[a].x*stars[c].x+stars[a].y*stars[c].y+stars[a].z*stars[c].z);
@@ -184,12 +184,15 @@ namespace beast {
 					starptr[staridx].p[4]<p4+ARC_ERR &&
 					starptr[staridx].p[4]>p4-ARC_ERR &&
 					starptr[staridx].p[5]<p5+ARC_ERR &&
-					starptr[staridx].p[5]>p5-ARC_ERR)
+					starptr[staridx].p[5]>p5-ARC_ERR) {
 					std::cout<<stars[a].starnum<<":"<<starptr[staridx].s[0]<<" "
 					<<stars[b].starnum<<":"<<starptr[staridx].s[1]<<" "
 					<<stars[c].starnum<<":"<<starptr[staridx].s[2]<<" "
 					<<stars[d].starnum<<":"<<starptr[staridx].s[3]<<std::endl<<std::flush;
+					return true;
+				}
 			}
+			return false;
 		}
 		void search_all() {
 			for (int d=3;d<stars.size();d++)
@@ -197,11 +200,32 @@ namespace beast {
 			for (int b=1;b<c;b++)
 			for (int a=0;a<b;a++) querydb(a,b,c,d);
 		}
-		void search_pilot() {
-			for (int d=3;d<stars.size();d++)
-			for (int c=2;c<d;c++)
-			for (int b=1;b<c;b++)
-			for (int a=0;a<b;a++) querydb(a,b,c,d);
+		bool search_pilot() {
+			int i,j,k,l;
+			int max=stars.size();
+			for (l=pilot+3; l<max;l++)
+				for (k=pilot+2; k<l;k++)
+					for (j=pilot+1;j<k;j++) 
+						if (querydb(pilot,j,k,l)) return true;
+			if (pilot==0) return false;
+
+			for (l=pilot+2; l<max;l++)
+				for (k=pilot+1; k<l;k++)
+					for (i=0;i<pilot;i++)
+						if (querydb(i,pilot,k,l)) return true;
+			if (pilot==1) return false;
+
+			for (l=pilot+1; l<max;l++)
+				for (j=1;j<pilot;j++)
+					for (i=0;i<j;i++)
+						if (querydb(i,j,pilot,l)) return true;
+			if (pilot==2) return false;
+
+			for (k=2; k<pilot;k++)
+				for (j=1;j<k;j++)
+					for (i=0;i<j;i++)
+						if (querydb(i,j,k,pilot)) return true;
+			return false;
 		}
 	};
 }
@@ -226,7 +250,8 @@ int main (int argc, char** argv) {
 	}
 	//for (int i=0;i<stars.size();i++) std::cout<<stars[i].x<<" "<<stars[i].y<<" "<<stars[i].z<<" "<<stars[i].mag<<std::endl<<std::flush;
 	//calculate constellations
-	sq.search_all();
+	//sq.search_all();
+	sq.search_pilot();
 	beast::close_db();
 }
 

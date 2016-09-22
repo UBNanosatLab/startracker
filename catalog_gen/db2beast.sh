@@ -1,12 +1,12 @@
 #!/bin/bash
 source calibration/calibration.txt
-python gendb_info.py < constellationdb.dat > info/starline.txt
-NUMCONST="$[`wc -l info/starline.txt | grep -o '^[0-9]*'`]"
+python gendb.py > calibration/constellations.txt
+NUMCONST="$[`wc -l calibration/constellations.txt | grep -o '^[0-9]*'`]"
 #2/5 was found experimentally to give the most evenly distributed database
 MIDPOINT="$[$NUMCONST*2/5]"
-PARAM1="`cut -d ' ' -f 1 < info/starline.txt | sort -n | head -n $MIDPOINT | tail -n 1 | sed s:$:/$ARC_ERR:g|bc`"
-PARAM2="`cut -d ' ' -f 2 < info/starline.txt | sort -n | head -n $MIDPOINT | tail -n 1 | sed s:$:/$ARC_ERR:g|bc`"
-PARAM3="`cut -d ' ' -f 3 < info/starline.txt | sort -n | head -n $MIDPOINT | tail -n 1 | sed s:$:/$ARC_ERR:g|bc`"
+PARAM1="`cut -d ' ' -f 1 < calibration/constellations.txt | sort -n | head -n $MIDPOINT | tail -n 1 | sed s:$:/$ARC_ERR:g|bc`"
+PARAM2="`cut -d ' ' -f 2 < calibration/constellations.txt | sort -n | head -n $MIDPOINT | tail -n 1 | sed s:$:/$ARC_ERR:g|bc`"
+PARAM3="`cut -d ' ' -f 3 < calibration/constellations.txt | sort -n | head -n $MIDPOINT | tail -n 1 | sed s:$:/$ARC_ERR:g|bc`"
 
 echo PARAM1=$PARAM1>calibration/dbsize.txt
 echo PARAM2=$PARAM2>>calibration/dbsize.txt

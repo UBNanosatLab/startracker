@@ -38,7 +38,7 @@ int main (int argc, char** argv) {
 	cfgfile2 >> config2;
 	cfgfile2.close();
 	
-	std::ifstream starline("info/starline.txt");
+	std::ifstream starline("calibration/constellations.txt");
 	
 	int PARAM1=atoi(config1["PARAM1"].c_str());
 	int PARAM2=atoi(config1["PARAM2"].c_str());

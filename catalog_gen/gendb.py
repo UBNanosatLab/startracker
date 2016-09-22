@@ -10,7 +10,6 @@ import itertools, operator
 #takes in 1 commandline argument. this is our minimum fov/2
 
 execfile("calibration/calibration.txt")
-execfile("calibration/dbsize.txt")
 
 if DEG_X<DEG_Y:
 	fovradius=DEG_X/2.0
@@ -33,10 +32,12 @@ def getstardb(filename="catalog.dat"):
 		Z=float(fields[6]);
 		MAX_BRIGHTNESS=float(fields[7]);
 		MIN_BRIGHTNESS=float(fields[8]);
-		stardb[HIP_ID]=[HIP_ID,MAG,DEC,RA,X,Y,Z,MAX_BRIGHTNESS,MIN_BRIGHTNESS]
+		UNRELIABLE=int(fields[9]);
+		stardb[HIP_ID]=[HIP_ID,MAG,DEC,RA,X,Y,Z,MAX_BRIGHTNESS,MIN_BRIGHTNESS,UNRELIABLE]
 	return stardb
 	
 stardb=getstardb()
+
 
 #generate a list of coordinates which covers the sky completely
 #with the constraint that the space between each point may be no more than fov/2
@@ -60,11 +61,19 @@ def searchxyz(starxyz,points,radius=fovradius):
 	pts = spatial.cKDTree(points)
 	return pts.query_ball_tree(xyz,2*abs(math.sin(math.radians(radius)/2)))
 
-def filtermagnitude(minmag=MIN_MAG):
+def filtermagnitude(minmag=IMAGE_MEAN*BRIGHTNESS_SIGMA*2):
 	global stardb
 	sd=np.array(stardb.values(),dtype = object)
 	for i in sd:
-		if i[1]>minmag:
+		#if i[1]>minmag:
+		if i[8]<minmag:
+			del stardb[i[0]]
+
+def filterunreliable():
+	global stardb
+	sd=np.array(stardb.values(),dtype = object)
+	for i in sd:
+		if i[9]:
 			del stardb[i[0]]
 
 def filterdoublestars(r=ARC_PER_PIX*4):
@@ -97,7 +106,7 @@ def fovstars():
 	global fovradius
 	global ARC_ERR
 	global stardb
-	sd=np.array(stardb.values(),dtype = object)
+	sd=np.array(stardb.values(),dtype=object)
 	err=ARC_ERR*2./3600.
 	xyz=np.array(sd[:,4:7].tolist(),dtype=float)
 	fovxyz=getglobe()
@@ -115,9 +124,10 @@ def fovstars():
 #this function takes in a sorted list, a key function and an error, and returns 
 #an iterator to every posible permutation of the list which is sorted to within +/- err
 #example: sorted_perms(sorted([3,2,1],key=vp),vp,1):
+#based on http://code.activestate.com/recipes/252178/
 
-def star_permutations(stars,key_func=lambda x: x,err=0):
-	assert(len(stars>3))
+def star_permutations(stars,key_min=lambda x: x,key_max=lambda x: x):
+	assert(len(stars)>3)
 	def sp(sl):
 		if len(sl) <=1:
 			yield sl
@@ -125,19 +135,54 @@ def star_permutations(stars,key_func=lambda x: x,err=0):
 			for perm in sp(sl[1:]):
 				yield sl[0:1] + perm[:]
 				for i in range(1,len(perm)+1):
-					if key_func(perm[i-1])<=key_func(sl[0])+err:
+					if key_min(perm[i-1])<=key_max(sl[0]):
 						yield perm[:i] + sl[0:1] + perm[i:]
 					else:
 						break
-	return [[i[0],i[1],i[2],i[3]] for i in sp(sorted(stars,key=key_func))]
+	return [[i[0],i[1],i[2],i[3]] for i in sp(sorted(stars,key=key_min))]
+
+def star_dist(s1,s2):
+	global stardb
+	return 3600*math.degrees(math.acos(np.clip(stardb[s1][4]*stardb[s2][4]+stardb[s1][5]*stardb[s2][5]+stardb[s1][6]*stardb[s2][6],a_min=-1,a_max=1)))
 
 def sort_uniq(sequence):
-    return itertools.imap(operator.itemgetter(0),itertools.groupby(sorted(sequence)))
+    return [i for i in itertools.imap(operator.itemgetter(0),itertools.groupby(sorted(sequence)))]
 
+def transpose_distance(oldstars):
+	global ARC_ERR
+	global stardb
+	err=ARC_ERR*2.
+	newstars=[]
+	for stars in oldstars:
+		dist={}
+		for i in stars:
+			dist[i]=star_dist(stars[0],i)
+		newstars+=star_permutations(stars,lambda s: dist[s],lambda s: dist[s]+err)
+	return newstars
+
+def transpose_brightness(oldstars):
+	global IMAGE_MEAN
+	global IMAGE_MAX
+	global BRIGHTNESS_SIGMA
+	global stardb
+	err=IMAGE_MEAN*BRIGHTNESS_SIGMA
+	err=0
+	newstars=[]
+	clipmax=lambda s: s if s<IMAGE_MAX else IMAGE_MAX
+	for stars in oldstars:
+		newstars+=star_permutations(stars,lambda s: -clipmax(stardb[s][7]+err),lambda s: -clipmax(stardb[s][8]))
+	return newstars
+
+def print_constellations(starlist):
+	for s in starlist:
+		print star_dist(s[0],s[1]),star_dist(s[0],s[2]),star_dist(s[0],s[3]),star_dist(s[1],s[2]),star_dist(s[1],s[3]),star_dist(s[2],s[3]),s[0],s[1],s[2],s[3]
 
 #only do this part if we were run as a python script
 if __name__ == '__main__':
-	filterdoublestars()
+	filterunreliable()
 	filtermagnitude()
-	for i in sort_uniq(fovstars()+nearstars()):
-		print [stardb[j][5] for j in i]
+	filterdoublestars()
+	starlist=sort_uniq(fovstars()+nearstars())
+	starlist=sort_uniq(transpose_distance(starlist))
+	starlist=sort_uniq(transpose_brightness(starlist))
+	print_constellations(starlist)
