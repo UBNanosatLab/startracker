@@ -15,6 +15,19 @@ echo NUMCONST=$NUMCONST>>calibration/dbsize.txt
 
 cat calibration/dbsize.txt
 #using a blocksize of 2 gives a factor of 8 improvement in space usage (each is an offset from the base)
+# change maxconst/8 to maxconst/27 if we ever get rid of the blocksize of 2
+
+MAXCONST="$[$PARAM1*$PARAM2*$PARAM3/8]"
+echo "MAXCONST=$MAXCONST"
+if [ $MAXCONST -lt $NUMCONST ]; then
+	echo "ERROR: Maximum number of constellations exceded"
+	echo "Recalibrate with a lower exposure time"
+	exit 1
+fi
+if [ $MAXCONST -lt $[10*$NUMCONST] ]; then
+	echo "Warning: Number of constelations approaching maximum"
+	echo "Consider recalibrating with a lower exposure time for better performance"
+fi
 LUTSIZE=$[($PARAM1/2)*($PARAM2/2)*($PARAM3/2)*4]
 #we have 6 parameters for verification, each stored as a double
 #struct adds a random extra 4 bits because reasons :-(

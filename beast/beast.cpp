@@ -250,8 +250,8 @@ int main (int argc, char** argv) {
 	}
 	//for (int i=0;i<stars.size();i++) std::cout<<stars[i].x<<" "<<stars[i].y<<" "<<stars[i].z<<" "<<stars[i].mag<<std::endl<<std::flush;
 	//calculate constellations
-	//sq.search_all();
-	sq.search_pilot();
+	sq.search_all();
+	//sq.search_pilot();
 	beast::close_db();
 }
 

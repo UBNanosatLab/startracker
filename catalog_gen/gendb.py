@@ -61,12 +61,15 @@ def searchxyz(starxyz,points,radius=fovradius):
 	pts = spatial.cKDTree(points)
 	return pts.query_ball_tree(xyz,2*abs(math.sin(math.radians(radius)/2)))
 
-def filtermagnitude(minmag=IMAGE_MEAN*BRIGHTNESS_SIGMA*2):
+#why IMAGE_STDEV*BRIGHT_ERR_SIGMA*2?
+#since the brightness threshold of the image centroiding program is IMAGE_STDEV*BRIGHT_ERR_SIGMA+IMAGE_MEAN
+#we need to add an extra BRIGHT_ERR_SIGMA to make sure star brightnesses enver drop below that amount
+def filterbrightness(minbright=IMAGE_STDEV*BRIGHT_ERR_SIGMA*2+IMAGE_MEAN):
 	global stardb
 	sd=np.array(stardb.values(),dtype = object)
 	for i in sd:
-		#if i[1]>minmag:
-		if i[8]<minmag:
+		#if i[1]>minbright:
+		if i[8]<minbright:
 			del stardb[i[0]]
 
 def filterunreliable():
@@ -163,10 +166,10 @@ def transpose_distance(oldstars):
 def transpose_brightness(oldstars):
 	global IMAGE_MEAN
 	global IMAGE_MAX
-	global BRIGHTNESS_SIGMA
+	global IMAGE_STDEV
+	global BRIGHT_ERR_SIGMA
 	global stardb
-	err=IMAGE_MEAN*BRIGHTNESS_SIGMA
-	err=0
+	err=IMAGE_STDEV*BRIGHT_ERR_SIGMA
 	newstars=[]
 	clipmax=lambda s: s if s<IMAGE_MAX else IMAGE_MAX
 	for stars in oldstars:
@@ -180,7 +183,7 @@ def print_constellations(starlist):
 #only do this part if we were run as a python script
 if __name__ == '__main__':
 	filterunreliable()
-	filtermagnitude()
+	filterbrightness()
 	filterdoublestars()
 	starlist=sort_uniq(fovstars()+nearstars())
 	starlist=sort_uniq(transpose_distance(starlist))

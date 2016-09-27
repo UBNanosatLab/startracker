@@ -15,8 +15,10 @@ BEGIN {
 	X=cos(deg2rad*RA)*cosdec;
 	Y=sin(deg2rad*RA)*cosdec;
 	Z=sin(deg2rad*DEC);
-	MAX_BRIGHTNESS=10^(($50-magconst)/-2.5);
-	MIN_BRIGHTNESS=10^(($51-magconst)/-2.5);
+	percentmax=10^(($50-magconst)/-2.5);
+	percentmin=10^(($51-magconst)/-2.5);
+	MAX_BRIGHTNESS=1.5*percentmax-0.5*percentmin;
+	MIN_BRIGHTNESS=1.5*percentmin-0.5*percentmax;
 	UNRELIABLE=($30==0||$30==1)&&$7!=3?0:1;
 	printf("%d %.12g %.12g %.12g %.12g %.12g %.12g %.12g %.12g %d\n",HIP_ID,MAG,RA,DEC,X,Y,Z,MAX_BRIGHTNESS,MIN_BRIGHTNESS,UNRELIABLE)
 }' hip_main.dat >catalog.dat
