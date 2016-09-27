@@ -5,11 +5,15 @@ os.chdir('../catalog_gen/')
 from gendb import *
 
 filterunreliable()
-filtermagnitude()
+filterbrightness()
 filterdoublestars()
 
-ra=0.0
-dec=0.0
+ra=0
+dec=0
+
+#ra=116.321271
+#dec=86.558233
+#fovradius=2.9
 
 x=math.cos(math.radians(ra))*math.cos(math.radians(dec))
 y=math.sin(math.radians(ra))*math.cos(math.radians(dec))
