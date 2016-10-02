@@ -134,7 +134,7 @@ namespace beast {
 	public:
 		std::vector<star> stars;
 		int pilot;
-		void __attribute__ ((used)) add_star(double px, double py, double mag) asm("") {
+		void __attribute__ ((used)) add_star(double px, double py, double mag) {
 			star s;
 			double j=(2*px/IMG_X-1)*tan(DEG_X*PI/(180*2)); //j=(x/z)
 			double k=(2*py/IMG_Y-1)*tan(DEG_Y*PI/(180*2)); //k=y/z
