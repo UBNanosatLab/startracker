@@ -134,7 +134,7 @@ namespace beast {
 	public:
 		std::vector<star> stars;
 		int pilot;
-		void add_star(double px, double py, double mag) {
+		void __attribute__ ((used)) add_star(double px, double py, double mag) asm("") {
 			star s;
 			double j=(2*px/IMG_X-1)*tan(DEG_X*PI/(180*2)); //j=(x/z)
 			double k=(2*py/IMG_Y-1)*tan(DEG_Y*PI/(180*2)); //k=y/z
@@ -154,8 +154,8 @@ namespace beast {
 			else if (s.magnum<=pilot) pilot++;
 			stars.insert(stars.begin()+s.magnum,s);
 		}
-		void sort_mag() {sort(stars.begin(), stars.end(), compare_mag);}
-		void sort_starnum() {sort(stars.begin(), stars.end(), compare_starnum);}
+		void __attribute__ ((used)) sort_mag() {sort(stars.begin(), stars.end(), compare_mag);}
+		void __attribute__ ((used)) sort_starnum() {sort(stars.begin(), stars.end(), compare_starnum);}
 		bool querydb(int a, int b, int c, int d) {
 			double p0,p1,p2,p3,p4,p5;
 			p0=(3600*180.0/PI)*acos(stars[a].x*stars[b].x+stars[a].y*stars[b].y+stars[a].z*stars[b].z);
@@ -194,7 +194,7 @@ namespace beast {
 			}
 			return false;
 		}
-		void search_all() {
+		void __attribute__ ((used)) search_all() {
 			for (int d=3;d<stars.size();d++)
 			for (int c=2;c<d;c++)
 			for (int b=1;b<c;b++)
