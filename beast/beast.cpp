@@ -156,7 +156,7 @@ namespace beast {
 		}
 		void __attribute__ ((used)) sort_mag() {sort(stars.begin(), stars.end(), compare_mag);}
 		void __attribute__ ((used)) sort_starnum() {sort(stars.begin(), stars.end(), compare_starnum);}
-		bool querydb(int a, int b, int c, int d) {
+		bool __attribute__ ((used)) querydb(int a, int b, int c, int d) {
 			double p0,p1,p2,p3,p4,p5;
 			p0=(3600*180.0/PI)*acos(stars[a].x*stars[b].x+stars[a].y*stars[b].y+stars[a].z*stars[b].z);
 			p1=(3600*180.0/PI)*acos(stars[a].x*stars[c].x+stars[a].y*stars[c].y+stars[a].z*stars[c].z);
@@ -200,7 +200,7 @@ namespace beast {
 			for (int b=1;b<c;b++)
 			for (int a=0;a<b;a++) querydb(a,b,c,d);
 		}
-		bool search_pilot() {
+		bool __attribute__ ((used)) search_pilot() {
 			int i,j,k,l;
 			int max=stars.size();
 			for (l=pilot+3; l<max;l++)
