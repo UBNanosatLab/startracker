@@ -9,7 +9,7 @@ g++ -O2 -fPIC -c beast.cpp -o beast.o
 
 g++ -O2 -fPIC -c beast_wrap.cxx -o beast_wrap.o -lstdc++ -I/usr/include/python2.7
 
-g++ -shared -fPIC beast_wrap.o beast.o -so _beast.so
+g++ -shared -fPIC beast_wrap.o beast.o -o _beast.so
 
 In python:
 import beast
