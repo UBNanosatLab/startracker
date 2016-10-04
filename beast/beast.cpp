@@ -17,17 +17,18 @@
 
 /* //mapping between px,py and x,y,z
  * 
- * //px-IMG_X/2=(x/z)IMG_X/(2*tan(DEG_X*pi/(180*2)))
- * //IMG_Y/2-py=(y/z)IMG_Y/(2*tan(DEG_Y*pi/(180*2)))
+ * //px=(x/z)IMG_X/(2*tan(DEG_X*pi/(180*2)))
+ * //py=(y/z)IMG_Y/(2*tan(DEG_Y*pi/(180*2)))
  * 
- * //px=IMG_X/2(1+(x/z)/tan(DEG_X*pi/(180*2)))
- * //py=IMG_Y/2(1-(y/z)/tan(DEG_Y*pi/(180*2)))
+ * //px=(x/z)IMG_X/(2*tan(DEG_X*pi/(180*2)))
+ * //py=(y/z)IMG_Y/(2*tan(DEG_Y*pi/(180*2)))
+
+
+ * //px-(IMG_X/2)=(x/z)IMG_X/(2*tan(DEG_X*pi/(180*2)))
+ * //py-(IMG_Y/2)=(y/z)IMG_Y/(2*tan(DEG_Y*pi/(180*2)))
  * 
- * //(2*px/IMG_X-1)=(x/z)/tan(DEG_X*pi/(180*2))
- * //(2*py/IMG_Y-1)=-(y/z)/tan(DEG_Y*pi/(180*2))
- * 
- * j=(2*px/IMG_X-1)*tan(DEG_X*pi/(180*2)); //j=(x/z)
- * k=(y/z)=-(2*py/IMG_Y-1)tan(DEG_Y*pi/(180*2)); //k=y/z
+ * j=(2*tan(DEG_X*pi/(180*2)))*px/IMG_X; //j=(x/z)
+ * k=(y/z)=(2*tan(DEG_Y*pi/(180*2)))*py/IMG_Y; //k=y/z
  * 
  * //(j^2+k^2+1)z^2=1
  * z=1/sqrt(j^2+k^2+1);
@@ -57,7 +58,7 @@ namespace beast {
 	int *map,fd;
 	struct constellation *starptr;
 	int PARAM1,PARAM2,PARAM3,NUMCONST,IMG_X,IMG_Y;
-	double DEG_X,DEG_Y,ARC_ERR;
+	double DEG_X,DEG_Y,PIXX_TANGENT,PIXY_TANGENT,ARC_ERR;
 	int i1_max,i2_max,i3_max;
 	size_t mapsize,dbsize;
 
@@ -136,17 +137,18 @@ namespace beast {
 		int pilot;
 		void __attribute__ ((used)) add_star(double px, double py, double mag) {
 			star s;
-			double j=(2*px/IMG_X-1)*tan(DEG_X*PI/(180*2)); //j=(x/z)
-			double k=(2*py/IMG_Y-1)*tan(DEG_Y*PI/(180*2)); //k=y/z
+			
+			double j=2*tan(DEG_X*PI/(180*2))*px/IMG_X; //j=(x/z)
+			double k=2*tan(DEG_Y*PI/(180*2))*py/IMG_Y; //k=y/z
 			s.x=1./sqrt(j*j+k*k+1);
 			s.y=j*s.x;
-			s.z=-k*s.x;
+			s.z=k*s.x;
 			s.mag=mag;
 			s.starnum=stars.size();
 			s.magnum=s.starnum;
 			s.hipid=0;
-			px=(IMG_X/2)*(1+(s.y/s.x)/tan(DEG_X*PI/(180*2)));
-			py=(IMG_Y/2)*(1-(s.z/s.x)/tan(DEG_Y*PI/(180*2)));
+			px=j*IMG_X/(2*tan(DEG_X*PI/(180*2)));
+			py=k*IMG_Y/(2*tan(DEG_Y*PI/(180*2)));
 			
 			//insert into list sorted by magnitude
 			for (;s.magnum>0&&compare_mag(s,stars[s.magnum-1]);s.magnum--);
