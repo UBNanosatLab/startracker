@@ -55,6 +55,6 @@ int main (int argc, char** argv) {
 		if (mu[i].m00>0) mc.push_back(Point3f(mu[i].m10/mu[i].m00,mu[i].m01/mu[i].m00,mu[i].m00));
 	}
 	sort(mc.begin(), mc.end(), compare_center);
-	for (int i = 0;i<mc.size();i++) std::cout <<mc[i].x<<" "<<mc[i].y<<" "<<-mc[i].z<<std::endl<<std::flush;
+	for (int i = 0;i<mc.size();i++) std::cout <<mc[i].x<<" "<<mc[i].y<<" "<<mc[i].z<<std::endl<<std::flush;
 }
 
