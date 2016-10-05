@@ -26,6 +26,8 @@ def image_stats(image):
             histo[j] = 0
         else:
             break;
+    n = int(sum(histo))
+
     numpy.asarray(histo)
     vals = []
     for k in range(0,256):
@@ -34,7 +36,9 @@ def image_stats(image):
 
     IMAGE_MEAN = numpy.average(vals,weights=histo)
     varience = numpy.average((vals - IMAGE_MEAN)**2,weights = histo)
-    varience = varience * (len(vals)/(len(vals)-1))
+
+    varience = varience * (n/n-1)
+
     IMAGE_STDEV = math.sqrt(varience)
 
 
