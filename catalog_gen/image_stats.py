@@ -15,23 +15,21 @@ def image_stats(image):
     for i in range(0,len(r)):
         histo[i] = (r[i] + g[i] + b[i])
     #multiplying by the weights
-    histo.sort()
+
     top1 = numpy.percentile(histo,99)
 
+    vals = []
+    #Sorting out top 1% and adding pixal values to vals array
+    for j in range(0,len(histo)):
 
-    #Sorting out top 1%
-    for j in range(len(histo)-1,0,-1):
-
+        vals.append(j)
         if (histo[j] >= top1):
             histo[j] = 0
-        else:
-            break;
+
+
     n = int(sum(histo))
 
     numpy.asarray(histo)
-    vals = []
-    for k in range(0,256):
-        vals.append(k)
     numpy.asarray(vals)
 
     IMAGE_MEAN = numpy.average(vals,weights=histo)
