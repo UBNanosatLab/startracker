@@ -1,18 +1,16 @@
 #!/bin/bash
 
 
-EXT="`echo \"$@\" | grep -o [^\.]*$`"
-cp "$@" calibration/image.$EXT
+convert -colorspace gray "$@" calibration/image.png
 cd calibration
-solve-field --overwrite  image.$EXT | grep "[0-9]"
+solve-field --overwrite  image.png | grep "[0-9]"
 wcsinfo image.wcs  | tr [:lower:] [:upper:] | tr " " "=" | grep "=[0-9.]*$" > calibration.txt
 
 echo "POS_ERR_SIGMA=1" >> calibration.txt
 echo "POS_ERR_STDEV=.5" >> calibration.txt
 
 echo "IMAGE_MAX=255" >> calibration.txt
-echo "IMAGE_MEAN=1.7" >> calibration.txt
-echo "IMAGE_STDEV=2.04" >>calibration.txt
+python ../image_stats.py >> calibration.txt
 echo "BRIGHT_ERR_SIGMA=5" >> calibration.txt
 
 echo "REF_MAG=8.3" >> calibration.txt
