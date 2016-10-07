@@ -10,8 +10,8 @@ echo "POS_ERR_SIGMA=1" >> calibration.txt
 echo "POS_ERR_STDEV=.5" >> calibration.txt
 
 echo "IMAGE_MAX=255" >> calibration.txt
-python ../image_stats.py >> calibration.txt
 echo "BRIGHT_ERR_SIGMA=5" >> calibration.txt
+python ../image_stats.py >> calibration.txt
 
 echo "REF_MAG=8.3" >> calibration.txt
 echo "REF_VAL=31.0" >> calibration.txt

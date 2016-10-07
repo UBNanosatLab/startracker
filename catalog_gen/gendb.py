@@ -79,7 +79,7 @@ def filterunreliable():
 		if i[9]:
 			del stardb[i[0]]
 
-def filterdoublestars(r=ARC_PER_PIX*4):
+def filterdoublestars(r=ARC_PER_PIX*2*PSF_RADIUS):
 	global stardb
 	sd=np.array(stardb.values(),dtype = object)
 	xyz=np.array(sd[:,4:7].tolist(),dtype=float)
