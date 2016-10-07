@@ -1,7 +1,7 @@
 import cv2
 import numpy as np
 import math
-execfile("calibration/calibration.txt")
+execfile("calibration.txt")
 #getting the Histogram, sorting and filtering out top 1% of stars,then printing the mean.
 image='image.png'
 img =cv2.imread(image,1)
