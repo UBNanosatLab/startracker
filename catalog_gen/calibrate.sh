@@ -1,7 +1,7 @@
 #!/bin/bash
 
 
-convert -colorspace gray "$@" calibration/image.png
+convert "$@" calibration/image.png
 cd calibration
 solve-field --overwrite  image.png | grep "[0-9]"
 wcsinfo image.wcs  | tr [:lower:] [:upper:] | tr " " "=" | grep "=[0-9.]*$" > calibration.txt
