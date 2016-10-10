@@ -1,4 +1,12 @@
 %module beast
+%typemap(out) double *perform_search %{
+  $result = PyList_New(8); // use however you know the size here
+  for (int i = 0; i < 8; ++i) {
+    PyList_SetItem($result, i, PyFloat_FromDouble($1[i]));
+  }
+  delete $1; // Important to avoid a leak since you called new
+%}
+
 %{
 #include <vector>
 
@@ -45,6 +53,7 @@ namespace beast
 		void search_all();
 		bool search_pilot();
 	};
+	extern double* perform_search(std::vector<std::vector< double > >);
 }
 
 %}
@@ -54,6 +63,8 @@ namespace beast
 namespace std
 {
 	%template(VectorStars) vector<beast::star>;
+	%template(Line) vector<double>;
+		%template(Array) vector < vector < double> >;
 }
 
 namespace beast
@@ -99,4 +110,5 @@ namespace beast
 		void search_all();
 		bool search_pilot();
 	};
+	extern double* perform_search(std::vector<std::vector< double > >);
 }

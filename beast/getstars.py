@@ -43,4 +43,4 @@ def extract_stars(input_file):
     results[:,0:2]=w.sip_pix2foc(results[:,0:2],1)
     return results
 
-for i in extract_stars("polaris-1s-gain38-4.bmp"): print i[0],i[1],i[2]
+#for i in extract_stars("polaris-1s-gain38-4.bmp"): print i[0],i[1],i[2]
