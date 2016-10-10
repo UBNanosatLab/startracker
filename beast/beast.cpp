@@ -16,25 +16,25 @@
 #define PI           3.14159265358979323846  /* pi */
 
 /* //mapping between px,py and x,y,z
- * 
+ *
  * //px=(x/z)IMG_X/(2*tan(DEG_X*pi/(180*2)))
  * //py=(y/z)IMG_Y/(2*tan(DEG_Y*pi/(180*2)))
- * 
+ *
  * //px=(x/z)IMG_X/(2*tan(DEG_X*pi/(180*2)))
  * //py=(y/z)IMG_Y/(2*tan(DEG_Y*pi/(180*2)))
 
 
  * //px-(IMG_X/2)=(x/z)IMG_X/(2*tan(DEG_X*pi/(180*2)))
  * //py-(IMG_Y/2)=(y/z)IMG_Y/(2*tan(DEG_Y*pi/(180*2)))
- * 
+ *
  * j=(2*tan(DEG_X*pi/(180*2)))*px/IMG_X; //j=(x/z)
  * k=(y/z)=(2*tan(DEG_Y*pi/(180*2)))*py/IMG_Y; //k=y/z
- * 
+ *
  * //(j^2+k^2+1)z^2=1
  * z=1/sqrt(j^2+k^2+1);
  * x=j*z;
  * y=k*z;
- */ 
+ */
 
 //using namespace std;
 
@@ -68,31 +68,31 @@ namespace beast {
 		std::ifstream cfgfile1("../catalog_gen/calibration/dbsize.txt");
 		cfgfile1 >> config1;
 		cfgfile1.close();
-		
+
 		configuration::data config2;
 		std::ifstream cfgfile2("../catalog_gen/calibration/calibration.txt");
 		cfgfile2 >> config2;
 		cfgfile2.close();
-		
-		
+
+
 		PARAM1=atoi(config1["PARAM1"].c_str());
 		PARAM2=atoi(config1["PARAM2"].c_str());
 		PARAM3=atoi(config1["PARAM3"].c_str());
 		NUMCONST=atoi(config1["NUMCONST"].c_str());
-		
+
 		IMG_X=atoi(config2["IMG_X"].c_str());
 		IMG_Y=atoi(config2["IMG_Y"].c_str());
 		DEG_X=atof(config2["DEG_X"].c_str());
 		DEG_Y=atof(config2["DEG_Y"].c_str());
 		ARC_ERR=atof(config2["ARC_ERR"].c_str());
-		
+
 		i1_max=PARAM1/2;
 		i2_max=PARAM2/2;
 		i3_max=PARAM3/2;
 
 		mapsize = i1_max*i2_max*i3_max;
 		dbsize = mapsize*sizeof(int) + NUMCONST*sizeof(struct constellation);
-		
+
 		/* Open a file for writing.
 		 *  - Creating the file if it doesn't exist.
 		 *  - Truncating it to 0 size if it already exists. (not really needed)
@@ -134,10 +134,14 @@ namespace beast {
 	class star_query {
 	public:
 		std::vector<star> stars;
+		bool stars_found;
+		int field_id[4];
+
+		int index_id[4];
 		int pilot;
 		void __attribute__ ((used)) add_star(double px, double py, double mag) {
 			star s;
-			
+
 			double j=2*tan(DEG_X*PI/(180*2))*px/IMG_X; //j=(x/z)
 			double k=2*tan(DEG_Y*PI/(180*2))*py/IMG_Y; //k=y/z
 			s.x=1./sqrt(j*j+k*k+1);
@@ -149,7 +153,7 @@ namespace beast {
 			s.hipid=0;
 			px=j*IMG_X/(2*tan(DEG_X*PI/(180*2)));
 			py=k*IMG_Y/(2*tan(DEG_Y*PI/(180*2)));
-			
+
 			//insert into list sorted by magnitude
 			for (;s.magnum>0&&compare_mag(s,stars[s.magnum-1]);s.magnum--);
 			if (s.starnum==0) pilot=0;
@@ -172,7 +176,7 @@ namespace beast {
 			if (i1<0) i1+=i1_max;
 			if (i2<0) i2+=i2_max;
 			if (i3<0) i3+=i3_max;
-			
+
 			//check for matches
 			for (int staridx=map[i1*i2_max*i3_max+i2*i3_max+i3];staridx!=-1;staridx=starptr[staridx].last) {
 				if (starptr[staridx].p[0]<p0+ARC_ERR &&
@@ -187,10 +191,15 @@ namespace beast {
 					starptr[staridx].p[4]>p4-ARC_ERR &&
 					starptr[staridx].p[5]<p5+ARC_ERR &&
 					starptr[staridx].p[5]>p5-ARC_ERR) {
-					std::cout<<stars[a].starnum<<":"<<starptr[staridx].s[0]<<" "
-					<<stars[b].starnum<<":"<<starptr[staridx].s[1]<<" "
-					<<stars[c].starnum<<":"<<starptr[staridx].s[2]<<" "
-					<<stars[d].starnum<<":"<<starptr[staridx].s[3]<<std::endl<<std::flush;
+					field_id[0]=stars[a].starnum;
+					field_id[1]=stars[b].starnum;
+					field_id[2]=stars[c].starnum;
+					field_id[3]=stars[d].starnum;
+					index_id[0]=starptr[staridx].s[0];
+					index_id[1]=starptr[staridx].s[1];
+					index_id[2]=starptr[staridx].s[2];
+					index_id[3]=starptr[staridx].s[3];
+					stars_found = true;
 					return true;
 				}
 			}
@@ -207,7 +216,7 @@ namespace beast {
 			int max=stars.size();
 			for (l=pilot+3; l<max;l++)
 				for (k=pilot+2; k<l;k++)
-					for (j=pilot+1;j<k;j++) 
+					for (j=pilot+1;j<k;j++)
 						if (querydb(pilot,j,k,l)) return true;
 			if (pilot==0) return false;
 
@@ -230,6 +239,39 @@ namespace beast {
 			return false;
 		}
 	};
+	double* perform_search(std::vector<std::vector< double > > stars){
+		/*
+		Takes in a 2-D vector where each inner vector is of the form (x,y,mag)
+		Returns an array of 8 doubles where are the indices alternate in the form:
+		star_id,hipparcos_id
+		An array containing all negative ones is returned when a constellation could
+		not be identified from the given stars
+		*/
+		beast::load_db();
+		beast::star_query sq;
+		for(int i =0;i<stars.size();++i){
+			sq.add_star(stars[i][0],stars[i][1],stars[i][2]);
+		}
+		sq.stars_found= false;
+		sq.search_all();
+
+		// TODO: fix this dirty return. Will need to change swig
+		// typemap in beast.i
+		double *to_ret = new double[8];
+		//failed queries will return an array of all -1
+		for(int i=0;i<8;i++)
+			to_ret[i]=-1;
+
+		if(sq.stars_found){
+			for(int i=0;i<4;++i){
+				to_ret[2*i] = sq.field_id[i];
+				to_ret[2*i+1] = sq.index_id[i];
+			}
+		}
+		return to_ret;
+		beast::close_db();
+
+	}
 }
 int main (int argc, char** argv) {
 	std::cout.precision(12);
@@ -253,7 +295,7 @@ int main (int argc, char** argv) {
 	//for (int i=0;i<stars.size();i++) std::cout<<stars[i].x<<" "<<stars[i].y<<" "<<stars[i].z<<" "<<stars[i].mag<<std::endl<<std::flush;
 	//calculate constellations
 	sq.search_all();
+
 	//sq.search_pilot();
 	beast::close_db();
 }
-
