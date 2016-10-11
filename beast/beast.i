@@ -1,12 +1,4 @@
 %module beast
-%typemap(out) double *perform_search %{
-  $result = PyList_New(8); // use however you know the size here
-  for (int i = 0; i < 8; ++i) {
-    PyList_SetItem($result, i, PyFloat_FromDouble($1[i]));
-  }
-  delete $1; // Important to avoid a leak since you called new
-%}
-
 %{
 #include <vector>
 
@@ -44,8 +36,9 @@ namespace beast
 	class star_query {
 	public:
 		std::vector<star> stars;
-		int pilot;
-
+		long pilot;
+		long im_0,im_1,im_2,im_3;
+		long db_0,db_1,db_2,db_3;
 		void add_star(double px, double py, double mag);
 		void sort_mag();
 		void sort_starnum();
@@ -53,7 +46,6 @@ namespace beast
 		void search_all();
 		bool search_pilot();
 	};
-	extern double* perform_search(std::vector<std::vector< double > >);
 }
 
 %}
@@ -101,8 +93,9 @@ namespace beast
 	class star_query {
 	public:
 		std::vector<star> stars;
-		int pilot;
-
+		long pilot;
+		long im_0,im_1,im_2,im_3;
+		long db_0,db_1,db_2,db_3;
 		void add_star(double px, double py, double mag);
 		void sort_mag();
 		void sort_starnum();
@@ -110,5 +103,4 @@ namespace beast
 		void search_all();
 		bool search_pilot();
 	};
-	extern double* perform_search(std::vector<std::vector< double > >);
 }
