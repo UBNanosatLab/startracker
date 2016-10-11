@@ -16,19 +16,18 @@ from gendb import *
 wcslist = fits.open('calibration/image.wcs')
 w = wcs.WCS(wcslist[0].header)
 os.chdir("../beast")
-def extract_stars(input_file):
+def extract_stars(img):
     """
-    Takes in a picture and will extract the star x,y centroids as well as
-    the value of the brightest pixel in each star
+    Takes in a an image opencv image array
 
     Args:
-        input_file: the file to be processed
+        input_file: the image
     Returns:
         An array containing tuples of star info. Tuple format :(x,y,brightest value in star)
 
     """
-    # 0 is the value used to read in an image in grey scale
-    img = cv2.imread(input_file,0)
+    img = cv2.cvtColor(img,cv2.COLOR_RGB2GRAY)
+    img = cv2.GaussianBlur(img,(3,3),0)
     #removes areas of the image that don't meet our brightness threshold
     ret,thresh = cv2.threshold(img,IMAGE_MEAN+IMAGE_STDEV*BRIGHT_ERR_SIGMA,IMAGE_MAX,3)
     contours,heirachy = cv2.findContours(thresh,1,2);
@@ -109,7 +108,7 @@ def identify_stars(image_stars_info):
         matched_stars: database of stars that were matched in the form
 	[im_id,db_id,[im_x,im_y,im_z],[db_x,db_y,db_z]]
     Raises:
-        NoMatchesFound: 
+        NoMatchesFound:
     """
     image_stars_info=np.array(image_stars_info)
     if len(image_stars_info)<4:
@@ -129,7 +128,10 @@ def identify_stars(image_stars_info):
     return [i+star_points[i[0]]+stardb[i[1]][4:7] for i in sort_uniq(star_ids)]
 
 if __name__ == '__main__':
-    image_stars_info = extract_stars("/home/andrew/Dropbox/2016 Fall/nanosat/test-images/pleiades-1s-gain38.bmp")
+    img = cv2.imread("/home/machine/software-testing/beast/polaris-1s-gain38-4.bmp")
+    image_stars_info = extract_stars(img)
+
+
     sq=identify_stars(image_stars_info)
     if (len(sq)>0):
         A=np.array([[i[2],i[3],i[4]] for i in sq])
