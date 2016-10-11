@@ -135,10 +135,9 @@ namespace beast {
 	public:
 		std::vector<star> stars;
 		bool stars_found;
-		int field_id[4];
-
-		int index_id[4];
-		int pilot;
+		long im_0,im_1,im_2,im_3;//ids of stars from image
+		long db_0,db_1,db_2,db_3;//ids of stars from db
+		long pilot;
 		void __attribute__ ((used)) add_star(double px, double py, double mag) {
 			star s;
 
@@ -163,6 +162,8 @@ namespace beast {
 		void __attribute__ ((used)) sort_mag() {sort(stars.begin(), stars.end(), compare_mag);}
 		void __attribute__ ((used)) sort_starnum() {sort(stars.begin(), stars.end(), compare_starnum);}
 		bool __attribute__ ((used)) querydb(int a, int b, int c, int d) {
+			im_0=-1;im_1=-1;im_2=-1;im_3=-1;
+			db_0=-1;db_1=-1;db_2=-1;db_3=-1;
 			double p0,p1,p2,p3,p4,p5;
 			p0=(3600*180.0/PI)*acos(stars[a].x*stars[b].x+stars[a].y*stars[b].y+stars[a].z*stars[b].z);
 			p1=(3600*180.0/PI)*acos(stars[a].x*stars[c].x+stars[a].y*stars[c].y+stars[a].z*stars[c].z);
@@ -191,14 +192,14 @@ namespace beast {
 					starptr[staridx].p[4]>p4-ARC_ERR &&
 					starptr[staridx].p[5]<p5+ARC_ERR &&
 					starptr[staridx].p[5]>p5-ARC_ERR) {
-					field_id[0]=stars[a].starnum;
-					field_id[1]=stars[b].starnum;
-					field_id[2]=stars[c].starnum;
-					field_id[3]=stars[d].starnum;
-					index_id[0]=starptr[staridx].s[0];
-					index_id[1]=starptr[staridx].s[1];
-					index_id[2]=starptr[staridx].s[2];
-					index_id[3]=starptr[staridx].s[3];
+					im_0=stars[a].starnum;
+					im_1=stars[b].starnum;
+					im_2=stars[c].starnum;
+					im_3=stars[d].starnum;
+					db_0=starptr[staridx].s[0];
+					db_1=starptr[staridx].s[1];
+					db_2=starptr[staridx].s[2];
+					db_3=starptr[staridx].s[3];
 					stars_found = true;
 					return true;
 				}
@@ -239,39 +240,6 @@ namespace beast {
 			return false;
 		}
 	};
-	double* perform_search(std::vector<std::vector< double > > stars){
-		/*
-		Takes in a 2-D vector where each inner vector is of the form (x,y,mag)
-		Returns an array of 8 doubles where are the indices alternate in the form:
-		star_id,hipparcos_id
-		An array containing all negative ones is returned when a constellation could
-		not be identified from the given stars
-		*/
-		beast::load_db();
-		beast::star_query sq;
-		for(int i =0;i<stars.size();++i){
-			sq.add_star(stars[i][0],stars[i][1],stars[i][2]);
-		}
-		sq.stars_found= false;
-		sq.search_all();
-
-		// TODO: fix this dirty return. Will need to change swig
-		// typemap in beast.i
-		double *to_ret = new double[8];
-		//failed queries will return an array of all -1
-		for(int i=0;i<8;i++)
-			to_ret[i]=-1;
-
-		if(sq.stars_found){
-			for(int i=0;i<4;++i){
-				to_ret[2*i] = sq.field_id[i];
-				to_ret[2*i+1] = sq.index_id[i];
-			}
-		}
-		return to_ret;
-		beast::close_db();
-
-	}
 }
 int main (int argc, char** argv) {
 	std::cout.precision(12);

@@ -1,11 +1,5 @@
 
-import os, sys
-
-sys.path.append('../catalog_gen/')
-os.chdir('../catalog_gen/')
-
-from gendb import *
-from astropy import wcs
+from getstars import *
 
 filterunreliable()
 filterbrightness()
@@ -62,5 +56,11 @@ result[:,4:7] = np.transpose(np.dot(rotation_matrix([1,0,0], math.radians(orient
 
 result[:,5:6]=(result[:,5:6]/result[:,4:5])*(IMG_X/2)/np.tan(DEG_X*np.pi/(180*2))
 result[:,6:7]=(result[:,6:7]/result[:,4:5])*(IMG_Y/2)/np.tan(DEG_Y*np.pi/(180*2))
-for i in result:
-	print i[5],i[6],i[7]
+
+image_stars_info = [[i[5],i[6],i[7]] for i in result]
+sq=identify_stars(image_stars_info)
+if (len(sq)>0):
+    A=np.array([[i[2],i[3],i[4]] for i in sq])
+    B=np.array([[i[5],i[6],i[7]] for i in sq])
+    R=rigid_transform_3D(A,B)
+    print A,B,R

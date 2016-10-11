@@ -1,6 +1,4 @@
-from astropy.io import fits
-from astropy import wcs
-import numpy as np
+from getstars import *
 
 hdulist = fits.open('../catalog_gen/calibration/image.corr')
 #print ','.join([hdulist[1].header['TTYPE'+str(i)] for i in range (1,14)])
@@ -24,4 +22,10 @@ wcslist = fits.open('../catalog_gen/calibration/image.wcs')
 w = wcs.WCS(wcslist[0].header)
 results[:,0:2]=w.sip_pix2foc(results[:,0:2],1)
 
-for i in results: print i[0],i[1],i[2]
+image_stars_info = [[i[0],i[1],i[2]] for i in results]
+sq=identify_stars(image_stars_info)
+if (len(sq)>0):
+    A=np.array([[i[2],i[3],i[4]] for i in sq])
+    B=np.array([[i[5],i[6],i[7]] for i in sq])
+    R=rigid_transform_3D(A,B)
+    print A,B,R
