@@ -16,19 +16,18 @@ from gendb import *
 wcslist = fits.open('calibration/image.wcs')
 w = wcs.WCS(wcslist[0].header)
 os.chdir("../beast")
-def extract_stars(input_file):
+def extract_stars(img):
     """
-    Takes in a picture and will extract the star x,y centroids as well as
-    the value of the brightest pixel in each star
+    Takes in a an image opencv image array
 
     Args:
-        input_file: the file to be processed
+        input_file: the image
     Returns:
         An array containing tuples of star info. Tuple format :(x,y,brightest value in star)
 
     """
-    # 0 is the value used to read in an image in grey scale
-    img = cv2.imread(input_file,0)
+    img = cv2.cvtColor(img,cv2.COLOR_RGB2GRAY)
+    img = cv2.GaussianBlur(img,(3,3),0)
     #removes areas of the image that don't meet our brightness threshold
     ret,thresh = cv2.threshold(img,IMAGE_MEAN+IMAGE_STDEV*BRIGHT_ERR_SIGMA,IMAGE_MAX,3)
     contours,heirachy = cv2.findContours(thresh,1,2);
@@ -114,7 +113,7 @@ def identify_stars(image_stars_info,star_points=[]):
         matched_stars: database of stars that were matched in the form
 	[im_id,db_id,[im_x,im_y,im_z],[db_x,db_y,db_z]]
     Raises:
-        NoMatchesFound: 
+        NoMatchesFound:
     """
     
     #give the option to pass in precomputed star points, but dont require it
@@ -138,7 +137,8 @@ if __name__ == '__main__':
     filterunreliable()
     filterbrightness()
     filterdoublestars()
-    image_stars_info = extract_stars("../catalog_gen/calibration/image.png")
+    img = cv2.imread("../catalog_gen/calibration/image.png")
+    image_stars_info = extract_stars(img)
     star_points=xyz_points(image_stars_info)
     sq =identify_stars(image_stars_info,star_points)
     if (len(sq)>0):
