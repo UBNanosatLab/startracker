@@ -89,15 +89,19 @@ def xyz_points(image_stars_info):
         star_points.append([x,y,z])
     return star_points
 
-def group_stars(star_points ,false_stars = 10):
+def group_stars(star_points ,false_stars = 12):
+    if (len(star_points)<4):
+        raise NoMatchesFound("Not enough stars")
+    if (len(star_points)-4<false_stars):
+        false_stars=len(star_points)-4
     star_kd = spatial.cKDTree(star_points)
     #arbitrarily chosen
     #second retval is the star array locations in tree.data
-    results = star_kd.query(star_points,false_stars+3)
+    results = star_kd.query(star_points,false_stars+4)
     return results[1]
 
 
-def identify_stars(image_stars_info):
+def identify_stars(image_stars_info,star_points=[]):
     """
     Takes in a list with star tuples of the form (x,y,mag) and attempts to
     determing the attitude matrix that would transfrom the stars from the image
@@ -105,17 +109,19 @@ def identify_stars(image_stars_info):
 
     Input:
         image_stars_info: list of star tuples of the form (x,y,mag)
+        star_points (optional): precomputed x,y,z values of image_stars_info
     Returns:
         matched_stars: database of stars that were matched in the form
 	[im_id,db_id,[im_x,im_y,im_z],[db_x,db_y,db_z]]
     Raises:
         NoMatchesFound: 
     """
+    
+    #give the option to pass in precomputed star points, but dont require it
+    if (len(star_points)==0):
+        star_points = xyz_points(image_stars_info)
     image_stars_info=np.array(image_stars_info)
-    if len(image_stars_info)<4:
-        raise NoMatchesFound("Not enough stars")
     star_ids = []
-    star_points=xyz_points(image_stars_info)
     for group in group_stars(star_points):
          query = beast.star_query()
          for i in image_stars_info[group]:
@@ -129,11 +135,15 @@ def identify_stars(image_stars_info):
     return [i+star_points[i[0]]+stardb[i[1]][4:7] for i in sort_uniq(star_ids)]
 
 if __name__ == '__main__':
-    image_stars_info = extract_stars("/home/andrew/Dropbox/2016 Fall/nanosat/test-images/pleiades-1s-gain38.bmp")
-    sq=identify_stars(image_stars_info)
+    filterunreliable()
+    filterbrightness()
+    filterdoublestars()
+    image_stars_info = extract_stars("../catalog_gen/calibration/image.png")
+    star_points=xyz_points(image_stars_info)
+    sq =identify_stars(image_stars_info,star_points)
     if (len(sq)>0):
         A=np.array([[i[2],i[3],i[4]] for i in sq])
         B=np.array([[i[5],i[6],i[7]] for i in sq])
         R=rigid_transform_3D(A,B)
-        print A,B,R
+        print A,B,R  
     #for i in extract_stars("polaris-1s-gain38-4.bmp"): print i[0],i[1],i[2]

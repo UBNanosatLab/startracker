@@ -115,13 +115,17 @@ def fovstars():
 	fovxyz=getglobe()
 	result=searchxyz(xyz,fovxyz,fovradius)
 	starlist=[]
+	numgood=0
 	for i in range(0,len(fovxyz)):
 		if len(result[i])>3:
+			numgood+=1
 			dist=np.degrees(np.arccos(np.clip(np.sum(fovxyz[i]*xyz[result[i]],1),a_min=-1,a_max=1)))
 			minidx=np.argmin(dist)
-			dist=np.degrees(np.arccos(np.clip(np.sum(xyz[i]*xyz[result[i]],1),a_min=-1,a_max=1)))
+			dist=np.degrees(np.arccos(np.clip(np.sum(xyz[result[i][minidx]]*xyz[result[i]],1),a_min=-1,a_max=1)))
+#			dist=np.degrees(np.arccos(np.clip(np.sum(xyz[i]*xyz[result[i]],1),a_min=-1,a_max=1)))
 			maxsize=heapq.nsmallest(4,dist)[-1]+err
 			starlist.append([int(sd[result[i][j]][0]) for j in range(0,len(dist)) if dist[j]<maxsize])
+	print >>sys.stderr,"Database coverage: "+str(100.0*numgood/len(fovxyz)) + "% percent of the sky"
 	return starlist
 			
 #this function takes in a sorted list, a key function and an error, and returns 
