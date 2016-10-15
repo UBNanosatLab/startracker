@@ -4,6 +4,7 @@ import time
 from astropy import wcs
 from astropy.io import fits
 import beast
+import datetime
 beast.load_db()
 
 import os, sys
@@ -26,6 +27,7 @@ def extract_stars(img):
         An array containing tuples of star info. Tuple format :(x,y,brightest value in star)
 
     """
+    img2 = img
     img = cv2.cvtColor(img,cv2.COLOR_RGB2GRAY)
     img = cv2.GaussianBlur(img,(3,3),0)
     #removes areas of the image that don't meet our brightness threshold
@@ -35,6 +37,7 @@ def extract_stars(img):
     for c in contours:
         M = cv2.moments(c)
         if M['m00']>0:
+
             #this is how the x and y position are defined by cv2
             cx = M['m10']/M['m00']
             cy = M['m01']/M['m00']
@@ -42,15 +45,168 @@ def extract_stars(img):
             #in the star in order to speed up the function by a factor of 10 and still
             #have beast return matches for constellations
             stars.append((cx,cy,cv2.getRectSubPix(img,(1,1),(cx,cy))))
-            #stars.append((cx,cy,img[int(cy),int(cx)]))
 
     #use astrometry calibration data to correct for image distortion
     #see http://docs.astropy.org/en/stable/api/astropy.wcs.WCS.html
+    for star in get_objects_of_interest(contours):
+        extract_axes(img2,cv2.moments(star))
+
+    #visualize(img2,contours)
     results=np.array(stars)
     results[:,0:2]=w.sip_pix2foc(results[:,0:2],1)
     return results
+def get_objects_of_interest(contours):
+
+    """
+    Returns a list of objects in the image that fall outside of 3 standard
+    deviations of the mean. The mean and standard deviation of the axis ratios
+    are used to determine what is anomalous stars
+        Input:
+            contours: the cv2 contours list of the stars in the image
+        Return:
+            list of objects found to be farther than 3 standard deviations
+            from the mean
+    """
+    # TODO:Also use stddev of angle of eigenvectors to determine if object is of
+    # interest
+    ratios = []
+    ratio_to_contour={}
+    for c in contours:
+        m =cv2.moments(c)
+        if m["m00"]<=0:
+            continue
+        eig_val,eig_vec = get_eigens(m)
+        axis_length = [4*np.sqrt(x) for x in eig_val]
+        sorted(axis_length)
+        ratio = axis_length[0]/axis_length[1]
+        ratio_to_contour[ratio] = c
+        ratios.append(ratio)
+    #better accuracy with double precision
+    stddev=np.std(ratios,dtype=np.float64)
+    mean = np.mean(ratios)
+
+    return [ ratio_to_contour[x] for x in ratios if x>=mean+3*stddev or x<=mean-3*stddev]
+
 class NoMatchesFound(Exception):
     pass
+def extract_via_mxb(start,end,length,img):
+    """
+    Extracts pixels along a line specified by a start and end point. The extracted
+    pixels will be written to the array specified by $blank
+        Input:
+            start: a tuple of the start point (x,y)
+            end: a tuple of the end point (x,y)
+            length: the length of the line
+                Note: this could be calculated but it has been calculated
+                      in previous steps
+            img: the image as a cv array to extract the pixels from
+        Return:
+            list containing the length of the line followed by that many rgb values
+    """
+
+    rise = (end[1]-start[1])/length
+    run = (end[0]-start[0])/length
+    next_pt = [x for x in start]
+    results = [int(length)]
+    for i in range(int(length)):
+        next_pt[0]+=run
+        next_pt[1]+=rise
+        rgb = cv2.getRectSubPix(img,(1,1),(next_pt[0],next_pt[1]))[0][0]
+        results.append(rgb)
+    return results
+def get_eigens(moments):
+    """
+    Calculates the eigenvectors and eigenvalues of the image from the moments
+        Input:
+            moments: list of moments
+        Output:
+            eigen_values: list of eigenvalues of the image
+            eigen_vectors: list of unit eigenvectors centered at the centroid
+                           of the image
+    """
+
+    assert moments["m00"] > 0
+    #definition of covariance matrix from image moments
+    cy = moments['m01']/moments['m00']
+    cx = moments['m10']/moments['m00']
+    u20 = moments["m20"]/moments["m00"] - cx**2
+    u02 = moments["m02"]/moments["m00"] - cy**2
+    u11 = moments["m11"]/moments["m00"] - cx*cy
+    covariance = np.matrix([[u20,u11],[u11,u20]])
+
+    return np.linalg.eig(covariance)
+
+def extract_axes(image,moments):
+    """
+    Extracts pixels along the major and minor axis of a contour described by
+    its moments
+        Input:
+            moments: the dictionary of image moments for an object
+            image: the image that contains the object that will have its axes
+                   extracted
+        Return:
+            Array containing just enough info to reconstruct the axes of the star.
+            The method used to recreate the axis as they were in the picture
+            can be found inside this method and inside extract_via_mxb.
+            Format of returned list:
+                eig_val: list of eigen_values
+                eig_vec: list of eigen_vectors
+                axis#: list containing the length of line preceded by that many rgb values
+
+    """
+    eig_val,eig_vec = get_eigens(moments)
+
+    eig_vec1 = np.matrix.tolist(eig_vec[0])[0]
+    eig_vec2 = np.matrix.tolist(eig_vec[1])[0]
+
+    # 4 = constant of proportionality
+    axis_length = [4*np.sqrt(x) for x in eig_val]
+
+    #draw lines on axes
+    cy = moments['m01']/moments['m00']
+    cx = moments['m10']/moments['m00']
+    #start and enpoints of lines
+    x11=(int(cx-eig_vec1[0]*axis_length[1]/2),int(cy-eig_vec1[1]*axis_length[1]/2))
+    x12=(int(cx+eig_vec1[0]*axis_length[1]/2),int(cy+eig_vec1[1]*axis_length[1]/2))
+    x21=(int(cx-eig_vec2[0]*axis_length[0]/2),int(cy-eig_vec2[1]*axis_length[0]/2))
+    x22=(int(cx+eig_vec2[0]*axis_length[0]/2),int(cy+eig_vec2[1]*axis_length[0]/2))
+
+    axis1 = extract_via_mxb(x11,x12,axis_length[1],image)
+    axis2 = extract_via_mxb(x21,x22,axis_length[0],image)
+    return [eig_val,eig_vec,axis1,axis2]
+
+def visualize(image,contours):
+    """
+    Purely used to visualize the axis work. Draws the axes on the stars in
+    bright lime green.
+        Input:
+            image: the image to have the axes drawn on its objects
+            contours: list of contours in the object
+    """
+    for c in contours:
+        moments = cv2.moments(c)
+        if(moments["m00"]<=0):
+            continue;
+        eig_val,eig_vec = get_eigens(moments)
+
+        eig_vec1 = np.matrix.tolist(eig_vec[0])[0]
+        eig_vec2 = np.matrix.tolist(eig_vec[1])[0]
+
+        # 4 = constant of proportionality
+        axis_length = [4*np.sqrt(x) for x in eig_val]
+
+        cy = moments['m01']/moments['m00']
+        cx = moments['m10']/moments['m00']
+
+        x11=(int(cx-eig_vec1[0]*axis_length[1]/2),int(cy-eig_vec1[1]*axis_length[1]/2))
+        x12=(int(cx+eig_vec1[0]*axis_length[1]/2),int(cy+eig_vec1[1]*axis_length[1]/2))
+        x21=(int(cx-eig_vec2[0]*axis_length[0]/2),int(cy-eig_vec2[1]*axis_length[0]/2))
+        x22=(int(cx+eig_vec2[0]*axis_length[0]/2),int(cy+eig_vec2[1]*axis_length[0]/2))
+
+        cv2.line(image,x11,x12,(0,255,0))
+        cv2.line(image,x21,x22,(0,255,0))
+    cv2.imshow("drawn",image)
+    cv2.waitKey()
 
 def rigid_transform_3D(A, B):
     """
@@ -77,6 +233,13 @@ def rigid_transform_3D(A, B):
     return attitude_matrix
 
 def xyz_points(image_stars_info):
+    """
+    Converts the (x,y,magnitude) values to x,y,z points
+        Input:
+            image_stars_info: list of tuples in the form (x,y,magnitude)
+        Output:
+            star_points: a list of tuples in the form (x,y,z)
+    """
     star_points = []
     for pixel_x,pixel_y,mag in image_stars_info:
         #formula for converting from x,y, magnitude to x,y,z
@@ -115,7 +278,7 @@ def identify_stars(image_stars_info,star_points=[]):
     Raises:
         NoMatchesFound:
     """
-    
+
     #give the option to pass in precomputed star points, but dont require it
     if (len(star_points)==0):
         star_points = xyz_points(image_stars_info)
@@ -139,11 +302,12 @@ if __name__ == '__main__':
     filterdoublestars()
     img = cv2.imread("../catalog_gen/calibration/image.png")
     image_stars_info = extract_stars(img)
-    star_points=xyz_points(image_stars_info)
-    sq =identify_stars(image_stars_info,star_points)
-    if (len(sq)>0):
-        A=np.array([[i[2],i[3],i[4]] for i in sq])
-        B=np.array([[i[5],i[6],i[7]] for i in sq])
-        R=rigid_transform_3D(A,B)
-        print A,B,R  
+    # star_points=xyz_points(image_stars_info)
+    # sq =identify_stars(image_stars_info,star_points)
+    # if (len(sq)>0):
+    #     A=np.array([[i[2],i[3],i[4]] for i in sq])
+    #     B=np.array([[i[5],i[6],i[7]] for i in sq])
+    #     R=rigid_transform_3D(A,B)
+    #     print A,B,R
+
     #for i in extract_stars("polaris-1s-gain38-4.bmp"): print i[0],i[1],i[2]
