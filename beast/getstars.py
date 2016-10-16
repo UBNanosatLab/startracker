@@ -67,10 +67,10 @@ def get_objects_of_interest(contours):
             list of objects found to be farther than 3 standard deviations
             from the mean
     """
-    # TODO:Also use stddev of angle of eigenvectors to determine if object is of
-    # interest
     ratios = []
     ratio_to_contour={}
+    angles = []
+    angle_to_contour={}
     for c in contours:
         m =cv2.moments(c)
         if m["m00"]<=0:
@@ -81,14 +81,41 @@ def get_objects_of_interest(contours):
         ratio = axis_length[0]/axis_length[1]
         ratio_to_contour[ratio] = c
         ratios.append(ratio)
-    #better accuracy with double precision
-    stddev=np.std(ratios,dtype=np.float64)
-    mean = np.mean(ratios)
 
-    return [ ratio_to_contour[x] for x in ratios if x>=mean+3*stddev or x<=mean-3*stddev]
+        angle = get_angle(m)
+        angle_to_contour[angle] = c
+        angles.append(angle)
+
+    #better accuracy with double precision
+    ratio_stddev=np.std(ratios,dtype=np.float64)
+    ratio_mean = np.ratio(ratios)
+
+    angle_stddev=np.std(ratios,dtype=np.float64)
+    angle_mean = np.ratio(ratios)
+
+    ratios_of_interest = [ ratio_to_contour[x] for x in ratios if x>=ratio_mean+3*ratio_stddev or x<=ratio_mean-3*ratio_stddev]
+    angles_of_interest = [ angle_to_contour[x] for x in angles if x>=angle_mean+3*angle_stddev or x<=angle_mean-3*angle_stddev]
+
+    return list(set(ratios_of_interest+angles_of_interest))
 
 class NoMatchesFound(Exception):
     pass
+def get_angle(moments):
+    """
+    Determines the orientation of the image from its moments
+        Inputs:
+            moments: list of image moments
+    """
+    assert moments["m00"] > 0
+    cy = moments['m01']/moments['m00']
+    cx = moments['m10']/moments['m00']
+    u20 = moments["m20"]/moments["m00"] - cx**2
+    u02 = moments["m02"]/moments["m00"] - cy**2
+    u11 = moments["m11"]/moments["m00"] - cx*cy
+
+    #definition of orientation angle
+    return 0.5*np.arctan(2*u11/(u20-u02))
+
 def extract_via_mxb(start,end,length,img):
     """
     Extracts pixels along a line specified by a start and end point. The extracted
