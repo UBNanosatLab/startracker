@@ -88,15 +88,15 @@ def get_objects_of_interest(contours):
 
     #better accuracy with double precision
     ratio_stddev=np.std(ratios,dtype=np.float64)
-    ratio_mean = np.ratio(ratios)
+    ratio_mean = np.mean(ratios)
 
     angle_stddev=np.std(ratios,dtype=np.float64)
-    angle_mean = np.ratio(ratios)
+    angle_mean = np.mean(angles)
 
     ratios_of_interest = [ ratio_to_contour[x] for x in ratios if x>=ratio_mean+3*ratio_stddev or x<=ratio_mean-3*ratio_stddev]
     angles_of_interest = [ angle_to_contour[x] for x in angles if x>=angle_mean+3*angle_stddev or x<=angle_mean-3*angle_stddev]
 
-    return list(set(ratios_of_interest+angles_of_interest))
+    return ratios_of_interest+angles_of_interest
 
 class NoMatchesFound(Exception):
     pass
@@ -114,7 +114,7 @@ def get_angle(moments):
     u11 = moments["m11"]/moments["m00"] - cx*cy
 
     #definition of orientation angle
-    return 0.5*np.arctan(2*u11/(u20-u02))
+    return 0.5*np.arctan2(2*u11,(u20-u02))
 
 def extract_via_mxb(start,end,length,img):
     """
@@ -292,7 +292,7 @@ def group_stars(star_points ,false_stars = 12):
 
 def identify_stars(image_stars_info,star_points=[]):
     """
-    Takes in a list with star tuples of the form (x,y,mag) and attempts to
+    Takes in a list with star tuples of the form (x,y,mag) and attempts to                                                                                               orm (x,y,mag) and attempts to
     determing the attitude matrix that would transfrom the stars from the image
     to their locations in the database
 
@@ -329,12 +329,12 @@ if __name__ == '__main__':
     filterdoublestars()
     img = cv2.imread("../catalog_gen/calibration/image.png")
     image_stars_info = extract_stars(img)
-    # star_points=xyz_points(image_stars_info)
-    # sq =identify_stars(image_stars_info,star_points)
-    # if (len(sq)>0):
-    #     A=np.array([[i[2],i[3],i[4]] for i in sq])
-    #     B=np.array([[i[5],i[6],i[7]] for i in sq])
-    #     R=rigid_transform_3D(A,B)
-    #     print A,B,R
+    star_points=xyz_points(image_stars_info)
+    sq =identify_stars(image_stars_info,star_points)
+    if (len(sq)>0):
+        A=np.array([[i[2],i[3],i[4]] for i in sq])
+        B=np.array([[i[5],i[6],i[7]] for i in sq])
+        R=rigid_transform_3D(A,B)
+        print A,B,R
 
     #for i in extract_stars("polaris-1s-gain38-4.bmp"): print i[0],i[1],i[2]
