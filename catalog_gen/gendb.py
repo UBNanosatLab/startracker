@@ -4,12 +4,13 @@ import math
 import sys
 import heapq
 import itertools, operator
+import config
 
 #this python file generates constelations based on what stars might be within a simulated field of view
 #the purpose of this is to make the database robust against cases where part of a constelation is cut off, but we still have enough stars to form another constelation
 #takes in 1 commandline argument. this is our minimum fov/2
 
-execfile("calibration/calibration.txt")
+execfile(config.PROJECT_ROOT+"catalog_gen/calibration/calibration.txt")
 
 if DEG_X<DEG_Y:
 	fovradius=DEG_X/2.0
@@ -18,7 +19,7 @@ else:
 
 
 #load our star catalog, converting from id,ra,dec to x,y,z,id
-def getstardb(filename="catalog.dat"):
+def getstardb(filename=config.PROJECT_ROOT+"catalog_gen/catalog.dat"):
 	stardb={}
 	starfile = open(filename)
 	for line in starfile.readlines():
@@ -35,7 +36,7 @@ def getstardb(filename="catalog.dat"):
 		UNRELIABLE=int(fields[9]);
 		stardb[HIP_ID]=[HIP_ID,MAG,DEC,RA,X,Y,Z,MAX_BRIGHTNESS,MIN_BRIGHTNESS,UNRELIABLE]
 	return stardb
-	
+
 stardb=getstardb()
 
 
@@ -88,7 +89,7 @@ def filterdoublestars(r=ARC_PER_PIX*2*PSF_RADIUS):
 			k=sd[i[j]][0]
 			if k in stardb:
 				del stardb[k]
-	
+
 def nearstars():
 	global fovradius
 	global ARC_ERR
@@ -127,8 +128,8 @@ def fovstars():
 			starlist.append([int(sd[result[i][j]][0]) for j in range(0,len(dist)) if dist[j]<maxsize])
 	print >>sys.stderr,"Database coverage: "+str(100.0*numgood/len(fovxyz)) + "% percent of the sky"
 	return starlist
-			
-#this function takes in a sorted list, a key function and an error, and returns 
+
+#this function takes in a sorted list, a key function and an error, and returns
 #an iterator to every posible permutation of the list which is sorted to within +/- err
 #example: sorted_perms(sorted([3,2,1],key=vp),vp,1):
 #based on http://code.activestate.com/recipes/252178/

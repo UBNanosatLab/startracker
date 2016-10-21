@@ -8,15 +8,13 @@ import datetime
 beast.load_db()
 
 import os, sys
-sys.path.append('../catalog_gen/')
-os.chdir('../catalog_gen/')
-from gendb import *
+from catalog_gen.gendb import *
+from config import PROJECT_ROOT
 
 #use astrometry calibration data to correct for image distortion
 #see http://docs.astropy.org/en/stable/api/astropy.wcs.WCS.html
-wcslist = fits.open('calibration/image.wcs')
+wcslist = fits.open(PROJECT_ROOT+'catalog_gen/calibration/image.wcs')
 w = wcs.WCS(wcslist[0].header)
-os.chdir("../beast")
 def extract_stars(img):
     """
     Takes in a an image opencv image array
@@ -327,7 +325,7 @@ if __name__ == '__main__':
     filterunreliable()
     filterbrightness()
     filterdoublestars()
-    img = cv2.imread("../catalog_gen/calibration/image.png")
+    img = cv2.imread(PROJECT_ROOT+"catalog_gen/calibration/image.png")
     image_stars_info = extract_stars(img)
     star_points=xyz_points(image_stars_info)
     sq =identify_stars(image_stars_info,star_points)
