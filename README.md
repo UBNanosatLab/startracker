@@ -9,6 +9,12 @@ sudo wget http://data.astrometry.net/4200/index-4212.fits
 cd
 git clone https://github.com/UBNanosatLab/software-testing.git
 
+cd software-testing
+python setup.py
+~~~~
+You must log out and then log back in for the changes in setup.py to take effect
+~~~~
+
 cd software-testing/beast
 ./go
 cd ../catalog_gen
@@ -17,3 +23,4 @@ cd ../catalog_gen
 ./hip2cat.sh
 ./db2beast.sh
 ~~~~
+
