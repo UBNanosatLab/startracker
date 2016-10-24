@@ -19,7 +19,7 @@ if sys.path.count(PROJECT_ROOT) == 1:
     bash_rc.close()
     print "Log out and log back in for changes to take effect."
     print "This file will need to be re-run if the directory is moved or the repository is re-downloaded"
-
+if not os.path.isfile("config.py"):
     config = open("config.py","w")
     config.write('PROJECT_ROOT="'+PROJECT_ROOT+'/"')
     config.close()
