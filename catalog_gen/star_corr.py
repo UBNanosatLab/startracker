@@ -2,9 +2,10 @@ from astropy.io import fits
 import numpy as np
 import gendb
 from itertools import chain
+from config import PROJECT_ROOT
 
 
-execfile("calibration/calibration.txt")
+execfile(PROJECT_ROOT+"catalog_gen/calibration/calibration.txt")
 
 def get_pos_err():
     """
@@ -12,7 +13,7 @@ def get_pos_err():
     our captured distance versus the distance as noted in the star database. Prints
     the star position standard deviation to stdout
     """
-    hdulist = fits.open('../catalog_gen/calibration/image.corr')
+    hdulist = fits.open(PROJECT_ROOT+'catalog_gen/calibration/image.corr')
     results=[(i['field_x']-i['index_x'])**2+(i['field_y']-i['index_y'])**2 for i in hdulist[1].data]
     POS_ERR_STDEV = np.sqrt(sum(results))/(2*(len(results)-1))
     print "POS_ERR_STDEV ", POS_ERR_STDEV
@@ -37,7 +38,7 @@ def get_ref_magnitude():
     pixel intensity is closest to the reference magnitude
     """
     REF_MAG = 127
-    hdulist = fits.open('../catalog_gen/calibration/image.corr')
+    hdulist = fits.open(PROJECT_ROOT+'catalog_gen/calibration/image.corr')
     ra_dec = [[i['index_ra'],i['index_dec']] for i in hdulist[1].data]
     xyz = [ra_dec_to_xyz(i) for i in ra_dec]
     radius = POS_ERR_STDEV*POS_ERR_SIGMA
