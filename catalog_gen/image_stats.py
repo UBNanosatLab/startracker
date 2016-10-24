@@ -1,8 +1,9 @@
 import cv2
 import numpy as np
 import math
+from config import PROJECT_ROOT
 fileVals = {}
-execfile("calibration/calibration.txt",fileVals)
+execfile(PROJECT_ROOT+"catalog_gen/calibration/calibration.txt",fileVals)
 BRIGHT_ERR_SIGMA = fileVals['BRIGHT_ERR_SIGMA']
 def calc_stats(img):
 
@@ -43,7 +44,7 @@ def calc_stats(img):
     varience = varience * n/(n-1)
     IMAGE_STDEV = math.sqrt(varience)
     return(IMAGE_MEAN,IMAGE_STDEV)
-def get_image_stats(image='calibration/image.png'):
+def get_image_stats(image=PROJECT_ROOT+'catalog_gen/calibration/image.png'):
 
     """ Takes in an image finds the Mean and Standard Deviation,
         blurs the image and recalulates the Mean and Standard Deviation
@@ -58,7 +59,7 @@ def get_image_stats(image='calibration/image.png'):
     run_1 = calc_stats(img)
     IMAGE_MEAN = run_1[0]
     IMAGE_STDEV = run_1[1]
-    #Below loops are replacing the  stars 
+    #Below loops are replacing the  stars
     for i in range(0,len(img)):
 
         for j in range(0,len(img[i])):
