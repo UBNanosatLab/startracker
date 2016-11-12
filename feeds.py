@@ -20,14 +20,14 @@ def _parent():
 	terminating=False
 	while not terminating:
 		item=parent_queue.get()
-		logger.info([time.time()]+item)
+		logger.info(item)
 		try:
 			if len(item)>1:
 				eval(item[0])(*item[1:])
 			else:
 				exec(item[0])
 		except Exception, e:
-			logger.error([time.time()]+e)
+			logger.error(e)
 
 def parent_cmd(*args):
 	parent_queue.put(list(args))		
@@ -136,14 +136,14 @@ class subscriber(Process):
 		terminating=False
 		while not terminating:
 			item=self._reader.recv()
-			logger.debug([time.time()]+item)
+			logger.debug(item)
 			try:
 				if len(item)>1:
 					eval(item[0])(*item[1:])
 				else:
 					exec(item[0])
 			except Exception, e:
-				logger.error([time.time()]+ e)
+				logger.error(e)
 		self._reader.close()
 				
 	def run(self):
