@@ -13,11 +13,11 @@ def get_pos_err():
     our captured distance versus the distance as noted in the star database. Prints
     the star position standard deviation to stdout
     """
-<<<<<<< HEAD
+
     hdulist = fits.open(PROJECT_ROOT+'catalog_gen/calibration/image.corr')
     results=[(i['field_x']-i['index_x'])**2+(i['field_y']-i['index_y'])**2 for i in hdulist[1].data]
     POS_ERR_STDEV = np.sqrt(sum(results))/(2*(len(results)-1))
-    print "POS_ERR_STDEV ", POS_ERR_STDEV
+    print "POS_ERR_STDEV="+str(POS_ERR_STDEV)
 
 def ra_dec_to_xyz(ra_dec):
     """
@@ -69,8 +69,8 @@ def get_ref_magnitude():
             REF_VAL= mag
             smallest_diff = diff
             smallest_id = hip_id
-    print "REF_VAL ",REF_VAL
-    print "REF_MAG ",REF_MAG
+    print "REF_VAL="+str(REF_VAL)
+    print "REF_MAG="+str(REF_MAG)
 
 if __name__ == '__main__':
     get_pos_err()
