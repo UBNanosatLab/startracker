@@ -17,7 +17,7 @@ if sys.path.count(PROJECT_ROOT) == 1:
     line = 'export PYTHONPATH="${PYTHONPATH}:'+PROJECT_ROOT+'"\n'
     bash_rc.write(line)
     bash_rc.close()
-    print "run source ~/.profile for changes to take effect."
+    print "Log out and log back in for changes to take effect."
     print "This file will need to be re-run if the directory is moved or the repository is re-downloaded"
 if not os.path.isfile("config.py"):
     config = open("config.py","w")
