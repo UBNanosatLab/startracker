@@ -65,7 +65,9 @@ def searchxyz(starxyz,points,radius=fovradius):
 #why IMAGE_STDEV*BRIGHT_ERR_SIGMA*2?
 #since the brightness threshold of the image centroiding program is IMAGE_STDEV*BRIGHT_ERR_SIGMA+IMAGE_MEAN
 #we need to add an extra BRIGHT_ERR_SIGMA to make sure star brightnesses enver drop below that amount
-def filterbrightness(minbright=IMAGE_STDEV*BRIGHT_ERR_SIGMA*2+IMAGE_MEAN):
+def filterbrightness(minbright=None):
+	if(minbright==None):
+		minbright=IMAGE_STDEV*BRIGHT_ERR_SIGMA*2+IMAGE_MEAN
 	global stardb
 	sd=np.array(stardb.values(),dtype = object)
 	for i in sd:
