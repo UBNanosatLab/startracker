@@ -4,6 +4,7 @@ from OpenGL.GLU import *
 import pygame
 import socket
 from datetime import datetime
+from time import time
 from pygame.locals import *
 import sys, os
 if sys.platform == 'win32' or sys.platform == 'win64':
@@ -51,7 +52,7 @@ def draw():
     ra_earth  = sidereal.hoursToRadians(lst.hours%24.0)
     dec_earth = latitude
     #print data
-    view_distance = 6*altitude/6367444.7 #5*orbit height/ earth radius
+    #view_distance = 6*altitude/6367444.7 #5*orbit height/ earth radius
     
     glLoadIdentity()
     glDisable(GL_LIGHTING)
@@ -115,7 +116,11 @@ def get_input():
     if keystate[K_DOWN] and view_angle[0] > -90: view_angle[0] -= 1.0
 
 def main():
+    curtime=time()
     while True:
         get_input()
         draw()
+        lasttime=curtime
+        curtime=time()
+        print "fps: "+str(1.0/(curtime-lasttime))
 if __name__ == "__main__": main()

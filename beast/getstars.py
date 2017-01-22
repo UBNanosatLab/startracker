@@ -321,7 +321,7 @@ def identify_stars(image_stars_info,star_points=[]):
              break
     return [i+star_points[i[0]]+stardb[i[1]][4:7] for i in sort_uniq(star_ids)]
 
-def determine_rotation_matrix(img_path):
+def determine_rotation_matrix(img_path=PROJECT_ROOT+"catalog_gen/calibration/image.png"):
     """
     Takes in a pth to an image and determines the attitude of the satellite
     based on the contents of the starfield in the image_stars_info
@@ -334,18 +334,16 @@ def determine_rotation_matrix(img_path):
     filterunreliable()
     filterbrightness()
     filterdoublestars()
-    img = None;
-    if(img_path == NULL):
-        img = cv2.imread(PROJECT_ROOT+"catalog_gen/calibration/image.png")
-    else:
-        img = cv2.imread(img_path)
+    img = cv2.imread(img_path)
     image_stars_info = extract_stars(img)
     star_points=xyz_points(image_stars_info)
     sq =identify_stars(image_stars_info,star_points)
     if (len(sq)>0):
         A=np.array([[i[2],i[3],i[4]] for i in sq])
         B=np.array([[i[5],i[6],i[7]] for i in sq])
-        return rigid_transform_3D(A,B)
+        R=rigid_transform_3D(A,B)
+        print A,B,R
+        #return R
 
 
     #for i in extract_stars("polaris-1s-gain38-4.bmp"): print i[0],i[1],i[2]
