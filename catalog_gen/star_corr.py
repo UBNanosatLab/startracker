@@ -1,7 +1,6 @@
 from astropy.io import fits
 import numpy as np
 import gendb
-from itertools import chain
 from config import PROJECT_ROOT
 
 
@@ -26,38 +25,32 @@ def get_ref_magnitude():
     Prints out the refrence magnitude and value of the star whose brightest
     pixel intensity is closest to the reference magnitude
     """
-    REF_MAG = 127
     hdulist = fits.open(PROJECT_ROOT+'catalog_gen/calibration/image.corr')
-    ra_dec = [[i['index_ra'],i['index_dec']] for i in hdulist[1].data]
-    xyz = [ra_dec_to_xyz(i) for i in ra_dec]
-    radius = POS_ERR_STDEV*POS_ERR_SIGMA
+    ra_dec_flux = [[i['index_ra'],i['index_dec'],i['FLUX']] for i in hdulist[1].data]
+    xyz = [ra_dec_to_xyz(i) for i in ra_dec_flux]
+    radius = POS_ERR_STDEV*POS_ERR_SIGMA/3600.0
     #map x,y,z to hipparcos id
-    db = []
     star_ids =[]
-    for k in gendb.stardb:
-        xyz_pt = gendb.stardb[k][4:7]
-        db.append(xyz_pt)
-        star_ids.append(k)
 
-    matched_indexes = gendb.searchxyz(db,xyz,radius);
+    sd=np.array(gendb.stardb.values(),dtype = object)
+    db=np.array(sd[:,4:7].tolist(),dtype=float)
 
-    #flattens the 2D array and filters out duplicates
-    matched_indexes = list(set(chain.from_iterable(matched_indexes)))
+    result = gendb.searchxyz(db,xyz,radius);
+
 
     smallest_diff = float("inf")
     REF_VAL = 0
     smallest_id = 0
     #find closest magnitude
-    for i in matched_indexes:
-        #7= index of MAX_BRIGHTNESS
-        hip_id = star_ids[i]
-        mag = gendb.stardb[hip_id][7]
-        diff = np.absolute(REF_MAG-mag)
-        if diff<smallest_diff:
-            REF_VAL= mag
-            smallest_diff = diff
-            smallest_id = hip_id
-    print "REF_VAL="+str(REF_VAL)
+    for i in range(0,len(xyz)):
+        if len(result[i])==1:
+            diff=abs(ra_dec_flux[i][2]-127)
+            if diff<smallest_diff:
+                REF_VAL= ra_dec_flux[i][2]
+                smallest_diff = diff
+                smallest_id = result[i][0]
+    REF_MAG=sd[smallest_id][1]
+    print "REF_VAL="+str(int(REF_VAL))
     print "REF_MAG="+str(REF_MAG)
 
 if __name__ == '__main__':

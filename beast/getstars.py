@@ -26,10 +26,12 @@ def extract_stars(img):
 
     """
     img2 = img
-    img = cv2.cvtColor(img,cv2.COLOR_RGB2GRAY)
     img = cv2.GaussianBlur(img,(3,3),0)
+    #subtract average background from image
+    img-=cv2.imread(PROJECT_ROOT+"beast/mean_image.png")
+    img = cv2.cvtColor(img,cv2.COLOR_RGB2GRAY)
     #removes areas of the image that don't meet our brightness threshold
-    ret,thresh = cv2.threshold(img,IMAGE_MEAN+IMAGE_STDEV*BRIGHT_ERR_SIGMA,IMAGE_MAX,3)
+    ret,thresh = cv2.threshold(img,IMAGE_STDEV*BRIGHT_ERR_SIGMA,IMAGE_MAX,3)
     contours,heirachy = cv2.findContours(thresh,1,2);
     stars = []
     for c in contours:

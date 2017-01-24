@@ -1,4 +1,10 @@
 #!/bin/bash
+#this script needs to run twice - once to create catalog.dat so that star_corr.py will work
+#then a second time once we have realistic values for REF_MAG and REF_VAL
+#I have tried to use ridiculous default values for REF_MAG and REF_VAL,
+# so that it will be more obvious if there is a problem
+REF_MAG=25
+REF_VAL=1
 source calibration/calibration.txt
 awk -v REF_MAG="$REF_MAG" -v REF_VAL="$REF_VAL" -F '|' '
 BEGIN {

@@ -63,11 +63,11 @@ def searchxyz(starxyz,points,radius=fovradius):
 	return pts.query_ball_tree(xyz,2*abs(math.sin(math.radians(radius)/2)))
 
 #why IMAGE_STDEV*BRIGHT_ERR_SIGMA*2?
-#since the brightness threshold of the image centroiding program is IMAGE_STDEV*BRIGHT_ERR_SIGMA+IMAGE_MEAN
-#we need to add an extra BRIGHT_ERR_SIGMA to make sure star brightnesses enver drop below that amount
+#since the brightness threshold of the image centroiding program is IMAGE_STDEV*BRIGHT_ERR_SIGMA
+#we need to add an extra BRIGHT_ERR_SIGMA to make sure star brightnesses never drops below that amount
 def filterbrightness(minbright=None):
 	if(minbright==None):
-		minbright=IMAGE_STDEV*BRIGHT_ERR_SIGMA*2+IMAGE_MEAN
+		minbright=IMAGE_STDEV*BRIGHT_ERR_SIGMA*2
 	global stardb
 	sd=np.array(stardb.values(),dtype = object)
 	for i in sd:
