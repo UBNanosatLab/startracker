@@ -3,7 +3,6 @@ import socket
  
 #see https://codeplasma.com/2012/12/03/getting-webcam-images-with-python-and-opencv-2-for-real-this-time/
 camera = cv2.VideoCapture(0)
-blank_img=cv2.imread("blank.png")
 # Captures a single image from the camera and returns it in PIL format
 def get_image():
  # read is the easiest way to get a full image out of a VideoCapture object.
@@ -24,7 +23,7 @@ while 1:
     get_image()
     get_image()
     get_image()
-    cv2.imwrite("webcam.png", cv2.subtract(get_image(),blank_img))
+    cv2.imwrite("webcam.png", get_image())
     webfile = open("webcam.png", "rb")
     webfiledata=webfile.read()
     response="HTTP/1.0 200 OK\r\n"
