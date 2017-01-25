@@ -27,6 +27,8 @@ fi
 if [ $MAXCONST -lt $[10*$NUMCONST] ]; then
 	echo "Warning: Number of constelations approaching maximum"
 	echo "Consider recalibrating with a lower exposure time for better performance"
+	echo "(this also benefits image speed and slew tolerance)"
+	echo "if this is not possible, edit calibrate.sh with a lower (brighter) MIN_MAG"
 fi
 LUTSIZE=$[($PARAM1/2)*($PARAM2/2)*($PARAM3/2)*4]
 #we have 6 parameters for verification, each stored as a double

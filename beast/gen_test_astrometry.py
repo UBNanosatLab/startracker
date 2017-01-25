@@ -15,7 +15,8 @@ hdulist = fits.open(PROJECT_ROOT+"catalog_gen/calibration/image.corr")
 #FLUX - maximum pixel brightness value of the star
 #BACKGROUND - brightness of the area around the star
 
-results=np.array([[i['index_x'],i['index_y'],i['flux']] for i in hdulist[1].data])
+#results=np.array([[i['index_x'],i['index_y'],i['flux']] for i in hdulist[1].data])
+results=np.array([[i['field_x'],i['field_y'],i['flux']] for i in hdulist[1].data])
 
 #use astrometry calibration data to correct for image distortion
 #see http://docs.astropy.org/en/stable/api/astropy.wcs.WCS.html
@@ -29,4 +30,3 @@ if (len(sq)>0):
     A=np.array([[i[2],i[3],i[4]] for i in sq])
     B=np.array([[i[5],i[6],i[7]] for i in sq])
     R=rigid_transform_3D(A,B)
-    print A,B,R

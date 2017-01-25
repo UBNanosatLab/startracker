@@ -10,11 +10,15 @@ cd ..
 ./hip2cat.sh >/dev/null
 cd calibration
 
-echo "POS_ERR_SIGMA=2.5" >> calibration.txt
-python ../../pos_err.py >>calibration.txt
+#echo "POS_ERR_SIGMA=2.5" >> calibration.txt
+echo "POS_ERR_SIGMA=5" >> calibration.txt
+python ../pos_err.py >>calibration.txt
 
 echo "IMAGE_MAX=255" >> calibration.txt
 echo "PSF_RADIUS=3.5" >> calibration.txt
+
+#"MIN_MAG=None" to automatically cut off at the dimmest stars we can see
+echo "MIN_MAG=None" >> calibration.txt
 python ../image_stats.py >> calibration.txt
 
 source calibration.txt

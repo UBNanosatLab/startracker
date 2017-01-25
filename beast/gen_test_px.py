@@ -5,11 +5,11 @@ filterunreliable()
 filterbrightness()
 filterdoublestars()
 
-ra=93.2341656425
-dec=86.2682656958
+ra=RA_TANGENT
+dec=DEC_TANGENT
 
-ra_center=116.321270769
-dec_center=86.5582328937
+ra_center=RA_CENTER
+dec_center=DEC_CENTER
 
 x=math.cos(math.radians(ra))*math.cos(math.radians(dec))
 y=math.sin(math.radians(ra))*math.cos(math.radians(dec))
@@ -20,9 +20,8 @@ x_center=math.cos(math.radians(ra_center))*math.cos(math.radians(dec_center))
 y_center=math.sin(math.radians(ra_center))*math.cos(math.radians(dec_center))
 z_center=math.sin(math.radians(dec_center))
 
-fovradius=4.545 / 2
-orientation=119.27164
-#orientation=180
+
+orientation=ORIENTATION
 
 
 def rotation_matrix(axis, theta):
@@ -63,4 +62,4 @@ if (len(sq)>0):
     A=np.array([[i[2],i[3],i[4]] for i in sq])
     B=np.array([[i[5],i[6],i[7]] for i in sq])
     R=rigid_transform_3D(A,B)
-    print A,B,R
+    

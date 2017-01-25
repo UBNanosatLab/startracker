@@ -51,7 +51,8 @@ def extract_stars(img):
     for star in get_objects_of_interest(contours):
         extract_axes(img2,cv2.moments(star))
 
-    #visualize(img2,contours)
+    img = cv2.cvtColor(img,cv2.COLOR_GRAY2RGB)
+    visualize(img,contours)
     results=np.array(stars)
     results[:,0:2]=w.sip_pix2foc(results[:,0:2],1)
     return results
@@ -230,8 +231,8 @@ def visualize(image,contours):
         x21=(int(cx-eig_vec2[0]*axis_length[0]/2),int(cy-eig_vec2[1]*axis_length[0]/2))
         x22=(int(cx+eig_vec2[0]*axis_length[0]/2),int(cy+eig_vec2[1]*axis_length[0]/2))
 
-        cv2.line(image,x11,x12,(0,255,0))
-        cv2.line(image,x21,x22,(0,255,0))
+        cv2.line(image,x11,x12,(0,0,255))
+        cv2.line(image,x21,x22,(0,0,255))
     cv2.imshow("drawn",image)
     cv2.waitKey()
 
@@ -252,11 +253,25 @@ def rigid_transform_3D(A, B):
     # dot is matrix multiplication for array
     H =  np.dot(np.transpose(A),B)
 
+
+    #calculate attitude matrix
+    #from http://malcolmdshuster.com/FC_MarkleyMortari_Girdwood_1999_AAS.pdf
     U, S, Vt = np.linalg.svd(H)
+    flip=np.linalg.det(U)*np.linalg.det(Vt)
 
     attitude_matrix = np.dot(U,Vt)
 
-
+    #rotation about the y axis (-90 to +90)
+    print "DEC="+str(np.degrees(np.arcsin(attitude_matrix[0,2])))
+    #rotation about the z axis (-180 to +180)
+    print "RA="+str(np.degrees(np.arctan2(attitude_matrix[0,1],attitude_matrix[0,0])))
+    #rotation about the camera axis (-180 to +180)
+    print "ORIENTATION="+str(np.degrees(-np.arctan2(attitude_matrix[1,2],attitude_matrix[2,2])))
+    
+    err=np.dot(A,attitude_matrix)-B
+    #average error in arcseconds
+    err=3600*np.degrees(np.mean(np.sqrt(np.sum(err*err,1))))
+    print "avg pixel error: "+str(err/ARC_PER_PIX)
     return attitude_matrix
 
 def xyz_points(image_stars_info):
@@ -309,6 +324,15 @@ def identify_stars(image_stars_info,star_points=[]):
     #give the option to pass in precomputed star points, but dont require it
     if (len(star_points)==0):
         star_points = xyz_points(image_stars_info)
+    #filter out stars that are below the threshhold
+    #note: thesholding should take care of this if MIN_MAG=None
+    #TODO: fix bug with thresholding  
+    minbright=IMAGE_STDEV*BRIGHT_ERR_SIGMA
+    if(MIN_MAG!=None):
+	    magconst=REF_MAG+2.5*math.log10(REF_VAL)
+	    minbright=max(minbright,10**((MIN_MAG-magconst)/-2.5))
+    star_points=[star_points[i] for i in range(0,len(image_stars_info)) if (image_stars_info[i][2]>=minbright)]
+    image_stars_info=[image_stars_info[i] for i in range(0,len(image_stars_info)) if (image_stars_info[i][2]>=minbright)]
     image_stars_info=np.array(image_stars_info)
     star_ids = []
     for group in group_stars(star_points):
@@ -344,7 +368,6 @@ def determine_rotation_matrix(img_path=PROJECT_ROOT+"catalog_gen/calibration/ima
         A=np.array([[i[2],i[3],i[4]] for i in sq])
         B=np.array([[i[5],i[6],i[7]] for i in sq])
         R=rigid_transform_3D(A,B)
-        print A,B,R
         #return R
 
 
