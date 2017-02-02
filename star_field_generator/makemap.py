@@ -8,8 +8,8 @@ def mag2val(mag,refmag,refval):
 	magconst=refmag+2.5*math.log10(refval)
 	val=10**((mag-magconst)/-2.5)
 	if val > 255:
-        val=255
-    return val
+		val=255
+	return val
 
 imagex=1024*int(sys.argv[1])*4
 imagey=1024*int(sys.argv[1])*2
