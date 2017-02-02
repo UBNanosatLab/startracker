@@ -25,7 +25,7 @@ for line in starfile.readlines():
     #this formula was experementally derived from Tennenbaum's laptop screen.
     #minmag was then adjusted until a 7.5 magnitude star has a brightness of 20
    
-    brightness=mag2val(mag,7.5,1)
+    brightness=mag2val(mag,6.5,10)
     
     pixelx=(360.0-ra)*imagex/360
     pixely=(90.0-dec)*imagey/180
