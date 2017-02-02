@@ -1,6 +1,7 @@
 #!/usr/bin/python
 import math
 import sys
+from numpy import clip
 
 #re
 def dot(s1_id,s2_id):
@@ -8,7 +9,7 @@ def dot(s1_id,s2_id):
 	xdot=stardb[int(s1_id)][0]*stardb[int(s2_id)][0]
 	ydot=stardb[int(s1_id)][1]*stardb[int(s2_id)][1]
 	zdot=stardb[int(s1_id)][2]*stardb[int(s2_id)][2]
-	return xdot+ydot+zdot
+	return clip(xdot+ydot+zdot,a_min=-1,a_max=1)
 
 
 stardb={}

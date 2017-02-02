@@ -11,12 +11,42 @@ import config
 #takes in 1 commandline argument. this is our minimum fov/2
 
 execfile(config.PROJECT_ROOT+"catalog_gen/calibration/calibration.txt")
+IMG_X=IMAGEW
+IMG_Y=IMAGEH
+DEG_X=FIELDW
+DEG_Y=FIELDH
 
-if DEG_X<DEG_Y:
-	fovradius=DEG_X/2.0
+
+if ALLOW_BIG_CONSTELLATIONS==0:
+	if DEG_X<DEG_Y:
+		fovradius=DEG_X/2.0
+	else:
+		fovradius=DEG_Y/2.0
 else:
-	fovradius=DEG_Y/2.0
+	fovradius=math.sqrt(DEG_X*DEG_Y)/2
 
+def rotation_matrix(axis, theta):
+    """
+    Return the rotation matrix associated with counterclockwise rotation about
+    the given axis by theta radians.
+    """
+    axis = np.asarray(axis)
+    axis = axis/math.sqrt(np.dot(axis, axis))
+    a = math.cos(theta/2.0)
+    b, c, d = -axis*math.sin(theta/2.0)
+    aa, bb, cc, dd = a*a, b*b, c*c, d*d
+    bc, ad, ac, ab, bd, cd = b*c, a*d, a*c, a*b, b*d, c*d
+    return np.array([[aa+bb-cc-dd, 2*(bc+ad), 2*(bd-ac)],
+                     [2*(bc-ad), aa+cc-bb-dd, 2*(cd+ab)],
+                     [2*(bd+ac), 2*(cd-ab), aa+dd-bb-cc]])
+
+#xyz_dist takes xyz of two points
+#returns distance in degrees
+def xyz_dist(xyz1,xyz2):
+	return math.degrees(math.acos(np.clip(np.dot(xyz1,xyz2),a_min=-1,a_max=1)))
+#star_dist takes ids of two stars,returns distance between them in arcseconds
+def star_dist(s1,s2):
+	return 3600*xyz_dist(stardb[s1][4:7],stardb[s2][4:7])
 
 #load our star catalog, converting from id,ra,dec to x,y,z,id
 def getstardb(filename=config.PROJECT_ROOT+"catalog_gen/catalog.dat"):
@@ -57,10 +87,12 @@ def getglobe():
 			globe.append([x,y,z])
 	return np.array(globe)
 
+#radius is in degrees
 def searchxyz(starxyz,points,radius=fovradius):
 	xyz = spatial.cKDTree(starxyz)
 	pts = spatial.cKDTree(points)
 	return pts.query_ball_tree(xyz,2*abs(math.sin(math.radians(radius)/2)))
+
 
 #why IMAGE_STDEV*BRIGHT_ERR_SIGMA*2?
 #since the brightness threshold of the image centroiding program is IMAGE_STDEV*BRIGHT_ERR_SIGMA
@@ -71,12 +103,13 @@ def filterbrightness():
 	#estimate min mag from reference image
 	minbright=IMAGE_STDEV*BRIGHT_ERR_SIGMA*2
 	if(MIN_MAG!=None):
-		magconst=REF_MAG+2.5*math.log10(REF_VAL)
-		minbright=max(minbright,10**((MIN_MAG-magconst)/-2.5))
-	for i in sd:
-		#if i[1]>minbright:
-		if i[8]<minbright:
-			del stardb[i[0]]
+		for i in sd:
+			if i[1]>minbright:
+				del stardb[i[0]]
+	else:	
+		for i in sd:
+			if i[8]<minbright:
+				del stardb[i[0]]
 
 def filterunreliable():
 	global stardb
@@ -85,7 +118,7 @@ def filterunreliable():
 		if i[9]:
 			del stardb[i[0]]
 
-def filterdoublestars(r=ARC_PER_PIX*2*PSF_RADIUS):
+def filterdoublestars(r=PIXSCALE*2*PSF_RADIUS):
 	global stardb
 	sd=np.array(stardb.values(),dtype = object)
 	xyz=np.array(sd[:,4:7].tolist(),dtype=float)
@@ -154,9 +187,7 @@ def star_permutations(stars,key_min=lambda x: x,key_max=lambda x: x):
 						break
 	return [[i[0],i[1],i[2],i[3]] for i in sp(sorted(stars,key=key_min))]
 
-def star_dist(s1,s2):
-	global stardb
-	return 3600*math.degrees(math.acos(np.clip(stardb[s1][4]*stardb[s2][4]+stardb[s1][5]*stardb[s2][5]+stardb[s1][6]*stardb[s2][6],a_min=-1,a_max=1)))
+
 
 def sort_uniq(sequence):
     return [i for i in itertools.imap(operator.itemgetter(0),itertools.groupby(sorted(sequence)))]
@@ -174,12 +205,8 @@ def transpose_distance(oldstars):
 	return newstars
 
 def transpose_brightness(oldstars):
-	global IMAGE_MEAN
-	global IMAGE_MAX
-	global IMAGE_STDEV
-	global BRIGHT_ERR_SIGMA
 	global stardb
-	err=IMAGE_STDEV*BRIGHT_ERR_SIGMA
+	err=IMAGE_STDEV*BRIGHT_ERR_SIGMA+BRIGHTNESS_FUDGE
 	newstars=[]
 	clipmax=lambda s: s if s<IMAGE_MAX else IMAGE_MAX
 	for stars in oldstars:
@@ -196,6 +223,7 @@ if __name__ == '__main__':
 	filterbrightness()
 	filterdoublestars()
 	starlist=sort_uniq(fovstars()+nearstars())
+	#starlist=sort_uniq(fovstars())
 	starlist=sort_uniq(transpose_distance(starlist))
 	starlist=sort_uniq(transpose_brightness(starlist))
 	print_constellations(starlist)

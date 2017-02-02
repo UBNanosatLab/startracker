@@ -4,6 +4,13 @@ import ImageDraw
 import math
 import sys
 
+def mag2val(mag,refmag,refval):
+	magconst=refmag+2.5*math.log10(refval)
+	val=10**((mag-magconst)/-2.5)
+	if val > 255:
+        val=255
+    return val
+
 imagex=1024*int(sys.argv[1])*4
 imagey=1024*int(sys.argv[1])*2
 
@@ -17,17 +24,12 @@ for line in starfile.readlines():
     
     #this formula was experementally derived from Tennenbaum's laptop screen.
     #minmag was then adjusted until a 7.5 magnitude star has a brightness of 20
-    minmag=8.5
-    brightness=int(math.pow(100,-0.612*(0.42347+mag-minmag))*5)
-    #brightness=255
-    if brightness > 255:
-        brightness=255
-
+   
+    brightness=mag2val(mag,7.5,1)
+    
     pixelx=(360.0-ra)*imagex/360
     pixely=(90.0-dec)*imagey/180
     distortion=1/math.cos(math.radians(dec))
-
-
 
     for x in range(int(round(pixelx-distortion/2)), int(round(pixelx+distortion/2))):
         im.putpixel(((-x)%imagex, int(round(pixely))),brightness)
