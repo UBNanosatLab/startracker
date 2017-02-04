@@ -66,7 +66,7 @@ def draw():
 
     #point the camera at the target ra and dec
     glRotatef(dec, -1.0, 0.0, 0.0)
-    glRotatef(ra, 0.0, 1.0, 0.0)
+    glRotatef(ra, 0.0, -1.0, 0.0)
 
     #map calculated sky ra and dec to the given latitude and longitude on earth
     glPushMatrix()

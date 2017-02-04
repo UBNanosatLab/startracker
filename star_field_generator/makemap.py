@@ -22,9 +22,6 @@ for line in starfile.readlines():
     dec=float(star[3])
     mag=float(star[1])
     
-    #this formula was experementally derived from Tennenbaum's laptop screen.
-    #minmag was then adjusted until a 7.5 magnitude star has a brightness of 20
-   
     brightness=mag2val(mag,6.5,20)
     
     pixelx=(360.0-ra)*imagex/360
@@ -32,7 +29,7 @@ for line in starfile.readlines():
     distortion=1/math.cos(math.radians(dec))
 
     for x in range(int(round(pixelx-distortion/2)), int(round(pixelx+distortion/2))):
-        im.putpixel(((-x)%imagex, int(round(pixely))),brightness)
+        im.putpixel((x%imagex, int(round(pixely))),brightness)
 
 im.save("starmap.png", "PNG")
 starfile.close()
