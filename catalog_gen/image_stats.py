@@ -5,6 +5,7 @@ import numpy as np
 import math
 from config import PROJECT_ROOT
 from scipy.stats import poisson
+import sys
 
 execfile(PROJECT_ROOT+"catalog_gen/calibration/calibration.txt")
 
@@ -23,6 +24,11 @@ mean_image/=num_images
 mean_image = cv2.GaussianBlur(mean_image,(3,3),0)
 cv2.imwrite(PROJECT_ROOT+"beast/mean_image.png",mean_image)
 
+#filter the background image for astrometry - more important for starfield generator
+imag = cv2.imread(sys.argv[1]).astype(float)
+cv2.imwrite("calibration/image.png",np.clip(imag-mean_image,a_min=0,a_max=255).astype(np.uint8))
+
+
 stdev_image=(images[0]-mean_image)**2
 for n in range(1, num_images):
 	stdev_image+=(images[n]-mean_image)**2
@@ -30,7 +36,6 @@ stdev_image=np.sqrt(stdev_image/(num_images-1))
 
 
 IMAGE_STDEV=np.mean(stdev_image)
-#1/(3e) chance a pixel will appear above the threshold
 BRIGHT_ERR_SIGMA=poisson.ppf(1-(3.0*NUM_FALSE_PIXELS)/(len(stdev_image)),IMAGE_STDEV)/IMAGE_STDEV
 print "IMAGE_STDEV="+str(IMAGE_STDEV)
 print "BRIGHT_ERR_SIGMA="+str(BRIGHT_ERR_SIGMA)

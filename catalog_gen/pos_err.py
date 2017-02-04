@@ -12,6 +12,7 @@ def get_pos_err():
     hdulist = fits.open(PROJECT_ROOT+'catalog_gen/calibration/image.corr')
     results=[(i['field_x']-i['index_x'])**2+(i['field_y']-i['index_y'])**2 for i in hdulist[1].data]
     POS_ERR_STDEV = np.sqrt(sum(results))/(2*(len(results)-1))
+    print np.sqrt(results)
     print "POS_ERR_STDEV="+str( POS_ERR_STDEV)
 if __name__ == '__main__':
     get_pos_err()

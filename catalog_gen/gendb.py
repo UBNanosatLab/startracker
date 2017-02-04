@@ -17,7 +17,7 @@ DEG_X=FIELDW
 DEG_Y=FIELDH
 
 
-if ALLOW_BIG_CONSTELLATIONS==0:
+if ALL_THESE_SQUARES_MAKE_A_CIRCLE==0:
 	if DEG_X<DEG_Y:
 		fovradius=DEG_X/2.0
 	else:
@@ -104,7 +104,7 @@ def filterbrightness():
 	minbright=IMAGE_STDEV*BRIGHT_ERR_SIGMA*2
 	if(MIN_MAG!=None):
 		for i in sd:
-			if i[1]>minbright:
+			if i[1]>MIN_MAG:
 				del stardb[i[0]]
 	else:	
 		for i in sd:

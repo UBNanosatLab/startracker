@@ -4,15 +4,17 @@ import time
 
 #use astrometry calibration data to correct for image distortion
 #see http://docs.astropy.org/en/stable/api/astropy.wcs.WCS.html
-#from astropy import wcs
-#wcslist = fits.open(PROJECT_ROOT+'catalog_gen/calibration/image.wcs')
-#w = wcs.WCS(wcslist[0].header)
 
-from astropy.io import fits
 
 import os, sys
 from catalog_gen.gendb import *
 from config import PROJECT_ROOT
+
+from astropy.io import fits
+if USE_WCS==1:
+	from astropy import wcs
+	wcslist = fits.open(PROJECT_ROOT+'catalog_gen/calibration/image.wcs')
+	w = wcs.WCS(wcslist[0].header)
 
 def rotation_matrix(axis, theta):
     """
@@ -82,7 +84,7 @@ def extract_stars(img):
     img = cv2.cvtColor(img,cv2.COLOR_RGB2GRAY)
     img = cv2.GaussianBlur(img,(3,3),0)
     #removes areas of the image that don't meet our brightness threshold
-    ret,thresh = cv2.threshold(img,IMAGE_STDEV*BRIGHT_ERR_SIGMA,IMAGE_MAX,cv2.THRESH_TOZERO)
+    ret,thresh = cv2.threshold(img,IMAGE_STDEV*BRIGHT_ERR_SIGMA,IMAGE_MAX,cv2.THRESH_BINARY)
     contours,heirachy = cv2.findContours(thresh,1,2);
     stars = []
     for c in contours:
@@ -99,16 +101,18 @@ def extract_stars(img):
 
     #for star in get_objects_of_interest(contours):
     #    extract_axes(img2,cv2.moments(star))
-    #img = cv2.cvtColor(img,cv2.COLOR_GRAY2RGB)
-    #visualize(img,contours)
+    visualize(img,contours)
 
 
     #use astrometry calibration data to correct for image distortion
     #see http://docs.astropy.org/en/stable/api/astropy.wcs.WCS.html
     results=np.array(stars)
-    #results[:,0:2]=w.sip_pix2foc(results[:,0:2],1)
-    results[:,0]=results[:,0]-IMG_X/2
-    results[:,1]=results[:,1]-IMG_Y/2
+    if USE_WCS==1:
+        results[:,0:2]=w.sip_pix2foc(results[:,0:2],1)
+    else:
+        results[:,0]=results[:,0]-IMG_X/2
+        results[:,1]=results[:,1]-IMG_Y/2
+
     return results
 def get_objects_of_interest(contours):
 
@@ -265,6 +269,7 @@ def visualize(image,contours):
             image: the image to have the axes drawn on its objects
             contours: list of contours in the object
     """
+    image = cv2.cvtColor(image,cv2.COLOR_GRAY2RGB)
     for c in contours:
         moments = cv2.moments(c)
         if(moments["m00"]<=0):
@@ -287,5 +292,5 @@ def visualize(image,contours):
 
         cv2.line(image,x11,x12,(0,0,255))
         cv2.line(image,x21,x22,(0,0,255))
-    cv2.imshow("drawn",image)
-    cv2.waitKey()
+    cv2.imwrite("drawn.png",image)
+    #cv2.waitKey()

@@ -27,8 +27,6 @@ def cal_xy_flux():
 	w = wcs.WCS(wcslist[0].header)
 	results[:,0:2]=w.sip_pix2foc(results[:,0:2],1)
 	
-	#results[:,0]=results[:,0]-IMG_X/2
-	#results[:,1]=results[:,1]-IMG_Y/2
 	return results
 
 image_stars_info = [[i[0],i[1],i[2]] for i in cal_xy_flux()]

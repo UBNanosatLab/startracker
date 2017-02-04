@@ -1,8 +1,8 @@
 cd catalog_gen &&
 ./go>/dev/stderr&&
-./calibrate.sh ../beast/polaris-tenth-gain41-4.png>/dev/stderr &&
+#./calibrate.sh ../beast/polaris-tenth-gain41-4.png>/dev/stderr &&
 #./calibrate.sh ../beast/polaris-1s-gain38-4.png>/dev/stderr &&
-#./calibrate.sh ../beast/webcam.png>/dev/stderr &&
+./calibrate.sh ../beast/webcam.png>/dev/stderr &&
 ./hip2cat.sh >/dev/stderr&&
 ./db2beast.sh >/dev/stderr&&
 cd ../beast &&
