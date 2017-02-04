@@ -38,6 +38,7 @@ def draw():
     s.close()
     ra=float(data[9].split(",")[0])
     dec=float(data[9].split(",")[1])
+    print "ra="+str(ra)+" dec="+str(dec)
     latitude=float(data[0].split(",")[0])
     longitude=float(data[0].split(",")[1])
     altitude=float(data[0].split(",")[2])
