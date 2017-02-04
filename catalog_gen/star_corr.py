@@ -81,7 +81,7 @@ if __name__ == '__main__':
 			if(MIN_MAG!=None):
 				x=int((star_match_cel[1]/star_match_cel[0])*(IMG_X/2)/np.tan(DEG_X*np.pi/(180*2)))+IMG_X/2
 				y=int((star_match_cel[2]/star_match_cel[0])*(IMG_Y/2)/np.tan(DEG_Y*np.pi/(180*2)))+IMG_Y/2
-				if (star_match[1]<5.5):
+				if (star_match[1]<MIN_MAG):
 					A+=[star_points[i].tolist()]
 					B+=[star_match[4:7].tolist()]
 					pixel_mag+=[[image_stars_info[i][2],star_match[1]]]
