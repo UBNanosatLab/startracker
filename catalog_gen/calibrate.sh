@@ -1,11 +1,11 @@
 #!/bin/bash
 
-echo "POS_ERR_SIGMA=2" > calibration/calibration.txt
+echo "POS_ERR_SIGMA=2.5" > calibration/calibration.txt
 echo "IMAGE_MAX=255" >> calibration/calibration.txt
 echo "PSF_RADIUS=3.5" >> calibration/calibration.txt
 #Use MIN_MAG=None with real startracker
-echo "MIN_MAG=None" >> calibration/calibration.txt
-echo "BRIGHTNESS_FUDGE=30" >> calibration/calibration.txt
+echo "MIN_MAG=4.5" >> calibration/calibration.txt
+echo "BRIGHTNESS_FUDGE=70" >> calibration/calibration.txt
 
 #on a good camera, setting this to 1 may make things worse
 echo "USE_WCS=0" >> calibration/calibration.txt

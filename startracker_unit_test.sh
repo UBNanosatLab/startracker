@@ -9,8 +9,8 @@ cd ../beast &&
 ./go >/dev/stderr&&
 echo -e "\nUsing ideal star locations:\n" &&
 [ `python gen_test_px.py 2>&1| tee /dev/stderr | wc -l` -ge 1 ] &&
-#echo -e "\nUsing astrometry centroiding:\n" &&
-#[ `python gen_test_astrometry.py 2>&1| tee /dev/stderr | wc -l` -ge 1 ] &&
+echo -e "\nUsing astrometry centroiding:\n" &&
+[ `python gen_test_astrometry.py 2>&1| tee /dev/stderr | wc -l` -ge 1 ] &&
 echo -e "\nUsing OpenCV centroiding:\n" &&
 [ `python startracker.py 2>&1| tee /dev/stderr | wc -l` -ge 1 ] &&
 echo "all tests passed!"
