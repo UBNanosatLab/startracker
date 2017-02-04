@@ -22,7 +22,7 @@ for line in starfile.readlines():
     dec=float(star[3])
     mag=float(star[1])
     
-    brightness=mag2val(mag,6.5,20)
+    brightness=mag2val(mag,7.5,10)
     
     pixelx=(360.0-ra)*imagex/360
     pixely=(90.0-dec)*imagey/180
