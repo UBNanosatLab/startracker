@@ -12,7 +12,7 @@ def resize((width, height)):
     glViewport(0, 0, width, height)
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
-    gluPerspective(32.0, float(width)/height, .1, 1000.)
+    gluPerspective(24.0, float(width)/height, .1, 1000.)
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
 
@@ -105,3 +105,8 @@ def main():
     glDisable(GL_TEXTURE_CUBE_MAP)
     glScale(1, 1, 1)
     glEndList()
+
+    #glGenLists(1)
+    #glNewList(1, GL_COMPILE)#Self
+    #glEndList()
+    

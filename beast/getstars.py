@@ -31,14 +31,25 @@ def rotation_matrix(axis, theta):
                      [2*(bc-ad), aa+cc-bb-dd, 2*(cd+ab)],
                      [2*(bd+ac), 2*(cd-ab), aa+dd-bb-cc]])
 
+def body2ECI_RA_DEC_ORI(body2ECI):
+	DEC=np.degrees(np.arcsin(body2ECI[0,2]))
+	RA=np.degrees(np.arctan2(body2ECI[0,1],body2ECI[0,0]))
+	ORIENTATION=np.degrees(-np.arctan2(body2ECI[1,2],body2ECI[2,2]))\
+    #rotation about the y axis (-90 to +90)
+    print >>sys.stderr, "DEC="+str(DEC)
+    #rotation about the z axis (-180 to +180)
+    print >>sys.stderr, "RA="+str(RA)
+    #rotation about the camera axis (-180 to +180)
+    print >>sys.stderr, "ORIENTATION="+str(ORIENTATION)
+    
 def rigid_transform_3D(A, B):
     """
     Takes in two matrices of points and finds the attitude matrix needed to
     transform one onto the other
 
     Input:
-        A: nx3 matrix
-        B: nx3 matrix
+        A: nx3 matrix - x,y,z in body frame
+        B: nx3 matrix - x,y,z in eci
         Note: the "n" dimension of both matrices must match
     Output:
         attitude_matrix: returned as a numpy matrix
@@ -54,16 +65,9 @@ def rigid_transform_3D(A, B):
     U, S, Vt = np.linalg.svd(H)
     flip=np.linalg.det(U)*np.linalg.det(Vt)
 
-    attitude_matrix = np.dot(U,Vt)
-
-    #rotation about the y axis (-90 to +90)
-    print >>sys.stderr, "DEC="+str(np.degrees(np.arcsin(attitude_matrix[0,2])))
-    #rotation about the z axis (-180 to +180)
-    print >>sys.stderr, "RA="+str(np.degrees(np.arctan2(attitude_matrix[0,1],attitude_matrix[0,0])))
-    #rotation about the camera axis (-180 to +180)
-    print >>sys.stderr, "ORIENTATION="+str(np.degrees(-np.arctan2(attitude_matrix[1,2],attitude_matrix[2,2])))
-    
-    return attitude_matrix
+    body2ECI = np.dot(U,Vt)
+    body2ECI_RA_DEC_ORI(body2ECI)
+    return body2ECI
 
 def extract_stars(img):
     """
