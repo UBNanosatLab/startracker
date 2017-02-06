@@ -288,13 +288,15 @@ def visualize(image,contours):
 
         cy = moments['m01']/moments['m00']
         cx = moments['m10']/moments['m00']
-
-        x11=(int(cx-eig_vec1[0]*axis_length[1]/2),int(cy-eig_vec1[1]*axis_length[1]/2))
-        x12=(int(cx+eig_vec1[0]*axis_length[1]/2),int(cy+eig_vec1[1]*axis_length[1]/2))
-        x21=(int(cx-eig_vec2[0]*axis_length[0]/2),int(cy-eig_vec2[1]*axis_length[0]/2))
-        x22=(int(cx+eig_vec2[0]*axis_length[0]/2),int(cy+eig_vec2[1]*axis_length[0]/2))
-
-        cv2.line(image,x11,x12,(0,0,255))
-        cv2.line(image,x21,x22,(0,0,255))
+        try:
+		    x11=(int(cx-eig_vec1[0]*axis_length[1]/2),int(cy-eig_vec1[1]*axis_length[1]/2))
+		    x12=(int(cx+eig_vec1[0]*axis_length[1]/2),int(cy+eig_vec1[1]*axis_length[1]/2))
+		    x21=(int(cx-eig_vec2[0]*axis_length[0]/2),int(cy-eig_vec2[1]*axis_length[0]/2))
+		    x22=(int(cx+eig_vec2[0]*axis_length[0]/2),int(cy+eig_vec2[1]*axis_length[0]/2))
+            
+		    cv2.line(image,x11,x12,(0,0,255))
+		    cv2.line(image,x21,x22,(0,0,255))
+        except ValueError:
+            print >>sys.stderr, "error"
     cv2.imwrite("drawn.png",image)
     #cv2.waitKey()
