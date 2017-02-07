@@ -4,7 +4,7 @@ from OpenGL.GLU import *
 import pygame
 import socket
 from datetime import datetime
-from time import time
+from time import time, sleep
 from pygame.locals import *
 import sys, os
 import numpy as np
@@ -41,12 +41,15 @@ def draw():
 	body2ECI=np.array(data[5].split(",")).astype(np.float).reshape((3, 3))
 	#rotation about the y axis (-90 to +90)
 	DEC=np.degrees(np.arcsin(body2ECI[0,2]))+view_angle[0]
-	print >>sys.stderr, "DEC="+str(DEC)
 	#rotation about the z axis (-180 to +180)
 	RA=np.degrees(np.arctan2(body2ECI[0,1],body2ECI[0,0]))+view_angle[1]
-	print >>sys.stderr, "RA="+str(RA)
 	#rotation about the camera axis (-180 to +180)
 	ORIENTATION=np.degrees(-np.arctan2(body2ECI[1,2],body2ECI[2,2]))+view_angle[2]
+	#DEC=60
+	#RA=150
+	#ORIENTATION=-20
+	print >>sys.stderr, "DEC="+str(DEC)
+	print >>sys.stderr, "RA="+str(RA)
 	print >>sys.stderr, "ORIENTATION="+str(ORIENTATION)
 	print data
 	latitude=float(data[0].split(",")[0])
@@ -134,6 +137,7 @@ def main():
 	while True:
 		get_input()
 		draw()
+		sleep(1)
 		lasttime=curtime
 		curtime=time()
 		print "fps: "+str(1.0/(curtime-lasttime))
