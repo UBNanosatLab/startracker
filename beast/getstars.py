@@ -35,12 +35,12 @@ def body2ECI_RA_DEC_ORI(body2ECI):
 	DEC=np.degrees(np.arcsin(body2ECI[0,2]))
 	RA=np.degrees(np.arctan2(body2ECI[0,1],body2ECI[0,0]))
 	ORIENTATION=np.degrees(-np.arctan2(body2ECI[1,2],body2ECI[2,2]))\
-    #rotation about the y axis (-90 to +90)
-    print >>sys.stderr, "DEC="+str(DEC)
-    #rotation about the z axis (-180 to +180)
-    print >>sys.stderr, "RA="+str(RA)
-    #rotation about the camera axis (-180 to +180)
-    print >>sys.stderr, "ORIENTATION="+str(ORIENTATION)
+	#rotation about the y axis (-90 to +90)
+	print >>sys.stderr, "DEC="+str(DEC)
+	#rotation about the z axis (-180 to +180)
+	print >>sys.stderr, "RA="+str(RA)
+	#rotation about the camera axis (-180 to +180)
+	print >>sys.stderr, "ORIENTATION="+str(ORIENTATION)
     
 def rigid_transform_3D(A, B):
     """
@@ -297,6 +297,6 @@ def visualize(image,contours):
 		    cv2.line(image,x11,x12,(0,0,255))
 		    cv2.line(image,x21,x22,(0,0,255))
         except ValueError:
-            print >>sys.stderr, "error"
+            print >>sys.stderr, "Single pixel star"
     cv2.imwrite("drawn.png",image)
     #cv2.waitKey()

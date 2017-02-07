@@ -2,7 +2,7 @@ cd catalog_gen &&
 ./go>/dev/stderr&&
 #./calibrate.sh ../beast/polaris-tenth-gain41-4.png>/dev/stderr &&
 #./calibrate.sh ../beast/polaris-1s-gain38-4.png>/dev/stderr &&
-./calibrate.sh ../beast/webcam.png>/dev/stderr &&
+./calibrate.sh ../beast/webcam_calibration.png>/dev/stderr &&
 ./hip2cat.sh >/dev/stderr&&
 ./db2beast.sh >/dev/stderr&&
 cd ../beast &&
@@ -12,5 +12,5 @@ echo -e "\nUsing ideal star locations:\n" &&
 echo -e "\nUsing astrometry centroiding:\n" &&
 [ `python gen_test_astrometry.py 2>&1| tee /dev/stderr | wc -l` -ge 1 ] &&
 echo -e "\nUsing OpenCV centroiding:\n" &&
-[ `python startracker.py 2>&1| tee /dev/stderr | wc -l` -ge 1 ] &&
+[ `echo "catalog_gen/calibration/image.png" | python startracker.py 2>&1| tee /dev/stderr | wc -l` -ge 1 ] &&
 echo "all tests passed!"

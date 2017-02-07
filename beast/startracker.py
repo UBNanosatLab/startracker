@@ -1,6 +1,7 @@
 from getstars import *
 import beast
 import datetime
+from time import time
 beast.load_db()
 
 def xyz_points(image_stars_info):
@@ -45,7 +46,7 @@ def identify_stars(image_stars_info,star_points=[]):
         star_points (optional): precomputed x,y,z values of image_stars_info
     Returns:
         matched_stars: database of stars that were matched in the form
-	[im_id,db_id,[im_x,im_y,im_z],[db_x,db_y,db_z]]
+    [im_id,db_id,[im_x,im_y,im_z],[db_x,db_y,db_z]]
     Raises:
         NoMatchesFound:
     """
@@ -61,16 +62,19 @@ def identify_stars(image_stars_info,star_points=[]):
     #image_stars_info=[image_stars_info[i] for i in range(0,len(image_stars_info)) if (image_stars_info[i][2]>=minbright)]
     image_stars_info=np.array(image_stars_info)
     star_ids = []
-    for group in group_stars(star_points):
-         query = beast.star_query()
-         for i in image_stars_info[group]:
-             query.add_star(i[0],i[1],i[2])
-         if (query.search_pilot()):
-             star_ids.append([group[query.im_0],int(query.db_0)])
-             star_ids.append([group[query.im_1],int(query.db_1)])
-             star_ids.append([group[query.im_2],int(query.db_2)])
-             star_ids.append([group[query.im_3],int(query.db_3)])
-             break
+    try:
+        for group in group_stars(star_points):
+             query = beast.star_query()
+             for i in image_stars_info[group]:
+                 query.add_star(i[0],i[1],i[2])
+             if (query.search_pilot()):
+                 star_ids.append([group[query.im_0],int(query.db_0)])
+                 star_ids.append([group[query.im_1],int(query.db_1)])
+                 star_ids.append([group[query.im_2],int(query.db_2)])
+                 star_ids.append([group[query.im_3],int(query.db_3)])
+                 break
+    except NoMatchesFound:
+        return []
     return [i+star_points[i[0]]+stardb[i[1]][4:7] for i in sort_uniq(star_ids)]
 
 def determine_rotation_matrix(img_path=PROJECT_ROOT+"catalog_gen/calibration/image.png"):
@@ -99,4 +103,9 @@ def determine_rotation_matrix(img_path=PROJECT_ROOT+"catalog_gen/calibration/ima
 
     #for i in extract_stars("polaris-1s-gain38-4.bmp"): print i[0],i[1],i[2]
 if __name__ == '__main__':
-    determine_rotation_matrix()
+    while True:
+        img_name=raw_input().rstrip()
+        if (img_name==''): break
+        starttime=time()
+        determine_rotation_matrix(PROJECT_ROOT+img_name)
+        print str(time() - starttime)
