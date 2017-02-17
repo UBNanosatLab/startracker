@@ -1,9 +1,10 @@
 from startracker import *
 from config import PROJECT_ROOT
+from astropy.io import fits
 from astropy import wcs
 
 def cal_xy_flux():
-	hdulist = fits.open(PROJECT_ROOT+"catalog_gen/calibration/image.corr")
+	hdulist = fits.open(PROJECT_ROOT+"catalog_gen/calibration/"+BESTCALIB+".corr")
 	#print ','.join([hdulist[1].header['TTYPE'+str(i)] for i in range (1,14)])
 	
 	#field_x,field_y,field_ra,field_dec,index_x,index_y,index_ra,index_dec,index_id,field_id,match_weight,FLUX,BACKGROUND
@@ -23,7 +24,7 @@ def cal_xy_flux():
 	#use astrometry calibration data to correct for image distortion
 	#see http://docs.astropy.org/en/stable/api/astropy.wcs.WCS.html
 	#APPARENTLY THIS DOESN'T WORK
-	wcslist = fits.open(PROJECT_ROOT+"catalog_gen/calibration/image.wcs")
+	wcslist = fits.open(PROJECT_ROOT+"catalog_gen/calibration/"+BESTCALIB+".wcs")
 	w = wcs.WCS(wcslist[0].header)
 	results[:,0:2]=w.sip_pix2foc(results[:,0:2],1)
 	

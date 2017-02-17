@@ -10,12 +10,6 @@ import os, sys
 from catalog_gen.gendb import *
 from config import PROJECT_ROOT
 
-from astropy.io import fits
-if USE_WCS==1:
-	from astropy import wcs
-	wcslist = fits.open(PROJECT_ROOT+'catalog_gen/calibration/image.wcs')
-	w = wcs.WCS(wcslist[0].header)
-
 def rotation_matrix(axis, theta):
     """
     Return the rotation matrix associated with counterclockwise rotation about
@@ -65,11 +59,15 @@ def rigid_transform_3D(A, B):
     U, S, Vt = np.linalg.svd(H)
     flip=np.linalg.det(U)*np.linalg.det(Vt)
 
+    #why was this not in here before?!
+    U[:,2]*=flip
+
     body2ECI = np.dot(U,Vt)
     body2ECI_RA_DEC_ORI(body2ECI)
     return body2ECI
 
-def extract_stars(img):
+median_image=cv2.imread(PROJECT_ROOT+"beast/median_image.png")
+def extract_stars(img,configfile=None,outputimg=0):
     """
     Takes in a an image opencv image array
 
@@ -79,16 +77,28 @@ def extract_stars(img):
         An array containing tuples of star info. Tuple format :(x,y,brightest value in star)
 
     """
-    img2 = img
+    
+    #this is used in star_corr.py when we have multipule sets of calibration data to choose from
+    global IMG_X
+    global IMG_Y
+    global DEG_X
+    global DEG_Y
+    if (configfile != None):
+		tmp={}
+		execfile(configfile,tmp)
+		IMG_X=tmp['IMG_X']
+		IMG_Y=tmp['IMG_Y']
+		DEG_X=tmp['DEG_X']
+		DEG_Y=tmp['DEG_Y']
+    #execfile('/home/andrew/startracker/catalog_gen/calibration/w1.solved')
     #subtract average background from image
-    mean_image=cv2.imread(PROJECT_ROOT+"beast/mean_image.png")
-    img=img.astype(np.int16)-mean_image.astype(np.int16)
+    img=img.astype(np.int16)-median_image.astype(np.int16)
     img=img.clip(0)
     img=img.astype(np.uint8)
     img = cv2.cvtColor(img,cv2.COLOR_RGB2GRAY)
     img = cv2.GaussianBlur(img,(3,3),0)
     #removes areas of the image that don't meet our brightness threshold
-    ret,thresh = cv2.threshold(img,IMAGE_STDEV*BRIGHT_ERR_SIGMA,IMAGE_MAX,cv2.THRESH_BINARY)
+    ret,thresh = cv2.threshold(img,IMAGE_VARIANCE*BRIGHT_ERR_SIGMA,IMAGE_MAX,cv2.THRESH_BINARY)
     contours,heirachy = cv2.findContours(thresh,1,2);
     stars = []
     for c in contours:
@@ -103,21 +113,16 @@ def extract_stars(img):
             #have beast return matches for constellations
             stars.append((cx,cy,cv2.getRectSubPix(img,(1,1),(cx,cy))))
 
-    #for star in get_objects_of_interest(contours):
-    #    extract_axes(img2,cv2.moments(star))
-    visualize(img,contours)
-
-
     #use astrometry calibration data to correct for image distortion
     #see http://docs.astropy.org/en/stable/api/astropy.wcs.WCS.html
     results=np.array(stars)
-    if USE_WCS==1:
-        results[:,0:2]=w.sip_pix2foc(results[:,0:2],1)
+    results[:,0]=results[:,0]-IMG_X/2
+    results[:,1]=results[:,1]-IMG_Y/2
+    if (outputimg==1):
+        return (results,visualize(img,contours))
     else:
-        results[:,0]=results[:,0]-IMG_X/2
-        results[:,1]=results[:,1]-IMG_Y/2
-
-    return results
+		return results
+	
 def get_objects_of_interest(contours):
 
     """
@@ -298,5 +303,5 @@ def visualize(image,contours):
 		    cv2.line(image,x21,x22,(0,0,255))
         except ValueError:
             print >>sys.stderr, "Single pixel star"
-    cv2.imwrite("drawn.png",image)
-    #cv2.waitKey()
+    return image
+
