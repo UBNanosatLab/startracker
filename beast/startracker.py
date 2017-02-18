@@ -23,7 +23,7 @@ def xyz_points(image_stars_info):
         star_points.append([x,y,z])
     return star_points
 
-def group_stars(star_points ,false_stars = 12):
+def group_stars(star_points ,false_stars = NUM_FALSE_STARS):
     if (len(star_points)<4):
         raise NoMatchesFound("Not enough stars")
     if (len(star_points)-4<false_stars):
@@ -54,12 +54,7 @@ def identify_stars(image_stars_info,star_points=[]):
     #give the option to pass in precomputed star points, but dont require it
     if (len(star_points)==0):
         star_points = xyz_points(image_stars_info)
-    #filter out stars that are below the threshhold (Why do we have to do this?!)
-    #TODO: fix bug with thresholding 
-     
-    #minbright=IMAGE_STDEV*BRIGHT_ERR_SIGMA
-    #star_points=[star_points[i] for i in range(0,len(image_stars_info)) if (image_stars_info[i][2]>=minbright)]
-    #image_stars_info=[image_stars_info[i] for i in range(0,len(image_stars_info)) if (image_stars_info[i][2]>=minbright)]
+
     image_stars_info=np.array(image_stars_info)
     star_ids = []
     try:
@@ -77,7 +72,7 @@ def identify_stars(image_stars_info,star_points=[]):
         return []
     return [i+star_points[i[0]]+stardb[i[1]][4:7] for i in sort_uniq(star_ids)]
 
-def determine_rotation_matrix(img_path=PROJECT_ROOT+"catalog_gen/calibration/image.png"):
+def determine_rotation_matrix(img_path):
     """
     Takes in a pth to an image and determines the attitude of the satellite
     based on the contents of the starfield in the image_stars_info
@@ -87,9 +82,7 @@ def determine_rotation_matrix(img_path=PROJECT_ROOT+"catalog_gen/calibration/ima
         a 2D rotation matrix (numpy format) of the image passed in
 
     """
-    filterunreliable()
-    filterbrightness()
-    filterdoublestars()
+
     img = cv2.imread(img_path)
     image_stars_info = extract_stars(img)
     star_points=xyz_points(image_stars_info)
@@ -100,12 +93,17 @@ def determine_rotation_matrix(img_path=PROJECT_ROOT+"catalog_gen/calibration/ima
         R=rigid_transform_3D(A,B)
         #return R
 
-
-    #for i in extract_stars("polaris-1s-gain38-4.bmp"): print i[0],i[1],i[2]
 if __name__ == '__main__':
+    filterunreliable()
+    filterbrightness()
+    filterdoublestars()
     while True:
-        img_name=raw_input().rstrip()
+        try:
+            img_name=raw_input().rstrip()
+        except EOFError:
+            break
         if (img_name==''): break
         starttime=time()
-        determine_rotation_matrix(PROJECT_ROOT+img_name)
-        print str(time() - starttime)
+        determine_rotation_matrix(img_name)
+        print "Time: "+str(time() - starttime)
+        sys.stdout.flush()

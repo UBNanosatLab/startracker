@@ -11,19 +11,15 @@ import config
 #takes in 1 commandline argument. this is our minimum fov/2
 
 execfile(config.PROJECT_ROOT+"catalog_gen/calibration/calibration.txt")
-IMG_X=IMAGEW
-IMG_Y=IMAGEH
-DEG_X=FIELDW
-DEG_Y=FIELDH
 
-
-if ALL_THESE_SQUARES_MAKE_A_CIRCLE==0:
-	if DEG_X<DEG_Y:
-		fovradius=DEG_X/2.0
+def getfovradius():
+	if ALL_THESE_SQUARES_MAKE_A_CIRCLE==0:
+		if DEG_X<DEG_Y:
+			return DEG_X/2.0
+		else:
+			return DEG_Y/2.0
 	else:
-		fovradius=DEG_Y/2.0
-else:
-	fovradius=math.sqrt(DEG_X*DEG_Y)/2
+		return math.sqrt(DEG_X*DEG_Y)/2
 
 def rotation_matrix(axis, theta):
     """
@@ -61,10 +57,10 @@ def getstardb(filename=config.PROJECT_ROOT+"catalog_gen/catalog.dat"):
 		X=float(fields[4]);
 		Y=float(fields[5]);
 		Z=float(fields[6]);
-		MAX_BRIGHTNESS=float(fields[7]);
-		MIN_BRIGHTNESS=float(fields[8]);
+		MAX_90P=float(fields[7]);
+		MIN_90P=float(fields[8]);
 		UNRELIABLE=int(fields[9]);
-		stardb[HIP_ID]=[HIP_ID,MAG,DEC,RA,X,Y,Z,MAX_BRIGHTNESS,MIN_BRIGHTNESS,UNRELIABLE]
+		stardb[HIP_ID]=[HIP_ID,MAG,DEC,RA,X,Y,Z,MAX_90P,MIN_90P,UNRELIABLE]
 	return stardb
 
 stardb=getstardb()
@@ -74,9 +70,8 @@ stardb=getstardb()
 #with the constraint that the space between each point may be no more than fov/2
 #the idea is we are simulating the process of pointing our camera at every possible region of sky
 def getglobe():
-	global fovradius
 	globe=[]
-	step=fovradius/math.sqrt(2)
+	step=getfovradius()/math.sqrt(2)
 	decstep=180/math.floor(180/step)
 	for dec in list(np.arange(-90+decstep/2,90,decstep)):
 		rastep=360/math.floor(360/(step/math.cos(math.radians(dec))))
@@ -88,27 +83,36 @@ def getglobe():
 	return np.array(globe)
 
 #radius is in degrees
-def searchxyz(starxyz,points,radius=fovradius):
+def searchxyz(starxyz,points,radius=None):
+	if (radius==None):
+		radius=getfovradius()
 	xyz = spatial.cKDTree(starxyz)
 	pts = spatial.cKDTree(points)
 	return pts.query_ball_tree(xyz,2*abs(math.sin(math.radians(radius)/2)))
 
 
-#why IMAGE_STDEV*BRIGHT_ERR_SIGMA*2?
-#since the brightness threshold of the image centroiding program is IMAGE_STDEV*BRIGHT_ERR_SIGMA
+def mag2val(mag):
+	return MAG2VAL_M*10**(mag/-2.5)+MAG2VAL_B
+def mag2min(mag):
+	return mag2val(mag)+MAG2VAL_BELOW*MAG_BOUND_SIGMA
+def mag2max(mag):
+	return mag2val(mag)+MAG2VAL_ABOVE*MAG_BOUND_SIGMA
+
+#why IMAGE_VARIANCE*BRIGHT_ERR_SIGMA*2?
+#since the brightness threshold of the image centroiding program is IMAGE_VARIANCE*BRIGHT_ERR_SIGMA
 #we need to add an extra BRIGHT_ERR_SIGMA to make sure star brightnesses never drops below that amount
 def filterbrightness():
 	global stardb
 	sd=np.array(stardb.values(),dtype = object)
 	#estimate min mag from reference image
-	minbright=IMAGE_STDEV*BRIGHT_ERR_SIGMA*2
+	minbright=IMAGE_VARIANCE*BRIGHT_ERR_SIGMA*2
 	if(MIN_MAG!=None):
 		for i in sd:
 			if i[1]>MIN_MAG:
 				del stardb[i[0]]
 	else:	
 		for i in sd:
-			if i[8]<minbright:
+			if mag2min(i[8])<minbright:
 				del stardb[i[0]]
 
 def filterunreliable():
@@ -118,8 +122,10 @@ def filterunreliable():
 		if i[9]:
 			del stardb[i[0]]
 
-def filterdoublestars(r=PIXSCALE*2*PSF_RADIUS):
+def filterdoublestars(r=None):
 	global stardb
+	if (r==None):
+		r=PIXSCALE*2*PSF_RADIUS
 	sd=np.array(stardb.values(),dtype = object)
 	xyz=np.array(sd[:,4:7].tolist(),dtype=float)
 	for i in searchxyz(xyz,xyz,r/3600.):
@@ -129,13 +135,12 @@ def filterdoublestars(r=PIXSCALE*2*PSF_RADIUS):
 				del stardb[k]
 
 def nearstars():
-	global fovradius
 	global ARC_ERR
 	global stardb
 	sd=np.array(stardb.values(),dtype = object)
 	err=ARC_ERR*2./3600.
 	xyz=np.array(sd[:,4:7].tolist(),dtype=float)
-	result=searchxyz(xyz,xyz,fovradius)
+	result=searchxyz(xyz,xyz,getfovradius())
 	starlist=[]
 	for i in range(0,len(xyz)):
 		if len(result[i])>3:
@@ -145,14 +150,13 @@ def nearstars():
 	return starlist
 
 def fovstars():
-	global fovradius
 	global ARC_ERR
 	global stardb
 	sd=np.array(stardb.values(),dtype=object)
 	err=ARC_ERR*2./3600.
 	xyz=np.array(sd[:,4:7].tolist(),dtype=float)
 	fovxyz=getglobe()
-	result=searchxyz(xyz,fovxyz,fovradius)
+	result=searchxyz(xyz,fovxyz,getfovradius())
 	starlist=[]
 	numgood=0
 	for i in range(0,len(fovxyz)):
@@ -161,7 +165,6 @@ def fovstars():
 			dist=np.degrees(np.arccos(np.clip(np.sum(fovxyz[i]*xyz[result[i]],1),a_min=-1,a_max=1)))
 			minidx=np.argmin(dist)
 			dist=np.degrees(np.arccos(np.clip(np.sum(xyz[result[i][minidx]]*xyz[result[i]],1),a_min=-1,a_max=1)))
-#			dist=np.degrees(np.arccos(np.clip(np.sum(xyz[i]*xyz[result[i]],1),a_min=-1,a_max=1)))
 			maxsize=heapq.nsmallest(4,dist)[-1]+err
 			starlist.append([int(sd[result[i][j]][0]) for j in range(0,len(dist)) if dist[j]<maxsize])
 	print >>sys.stderr,"Database coverage: "+str(100.0*numgood/len(fovxyz)) + "% percent of the sky"
@@ -206,11 +209,15 @@ def transpose_distance(oldstars):
 
 def transpose_brightness(oldstars):
 	global stardb
-	err=IMAGE_STDEV*BRIGHT_ERR_SIGMA+BRIGHTNESS_FUDGE
+	err=IMAGE_VARIANCE*BRIGHT_ERR_SIGMA
 	newstars=[]
 	clipmax=lambda s: s if s<IMAGE_MAX else IMAGE_MAX
-	for stars in oldstars:
-		newstars+=star_permutations(stars,lambda s: -clipmax(stardb[s][7]+err),lambda s: -clipmax(stardb[s][8]))
+	if(MIN_MAG!=None):
+		for stars in oldstars:
+			newstars+=star_permutations(stars,lambda s: -clipmax(mag2max(stardb[s][1])+err),lambda s: -clipmax(mag2min(stardb[s][1])))
+	else:
+		for stars in oldstars:
+			newstars+=star_permutations(stars,lambda s: -clipmax(mag2max(stardb[s][7])+err),lambda s: -clipmax(mag2min(stardb[s][8])))
 	return newstars
 
 def print_constellations(starlist):
