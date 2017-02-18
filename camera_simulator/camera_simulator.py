@@ -31,8 +31,6 @@ longitude_offset=0.0
 def draw():
 	latitude = 42.886448
 	longitude = -78.878372 
-	latitude = 30
-	longitude = 0
 	#RESET ALL----------------------------------------
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
@@ -55,8 +53,8 @@ def draw():
 	print >>sys.stderr, "RA="+str(RA)
 	print >>sys.stderr, "ORIENTATION="+str(ORIENTATION)
 	print data
-	#latitude=float(data[0].split(",")[0])
-	#longitude=float(data[0].split(",")[1])
+	latitude=float(data[0].split(",")[0])
+	longitude=float(data[0].split(",")[1])
 	altitude=float(data[0].split(",")[2])
 	if altitude < 0.0:
 		altitude=-altitude
@@ -73,7 +71,7 @@ def draw():
 	longitude+=longitude_offset
 	#print data
 	#view_distance = 6*altitude/6367444.7 #5*orbit height/ earth radius
-	print ts
+	
 	glLoadIdentity()
 	glDisable(GL_LIGHTING)
 
