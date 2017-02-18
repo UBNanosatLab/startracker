@@ -105,3 +105,19 @@ def main():
     glDisable(GL_TEXTURE_CUBE_MAP)
     glScale(1, 1, 1)
     glEndList()
+
+    MoonFile = os.path.join('Data', 'rgb.png')
+    MoonSurface = pygame.image.load(MoonFile)
+    MoonData = pygame.image.tostring(MoonSurface, "RGBA", 1)
+
+    glGenLists(1)
+    glNewList(3, GL_COMPILE)#Self
+    glBindTexture(GL_TEXTURE_2D, textures[0])
+    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, MoonSurface.get_width(), MoonSurface.get_height(), 0,
+                  GL_RGBA, GL_UNSIGNED_BYTE, MoonData )
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR)
+    glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
+    Sphere2 = gluNewQuadric()
+    gluQuadricTexture(Sphere2, GL_TRUE)
+    gluSphere(Sphere2, .025, 10, 10)
+    glEndList()

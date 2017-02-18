@@ -23,13 +23,16 @@ host = 'jeb.eng.buffalo.edu'
 port = 7008 
 size = 1024 
 
-view_distance = 6*6781000/6367444.7 #5*orbit height/ earth radius
+#view_distance = 5*6781000/6367444.7 #5*orbit height/ earth radius
+view_distance = 6
 view_angle = [0.0, 0.0,0.0]
 longitude_offset=0.0
 	
 def draw():
 	latitude = 42.886448
 	longitude = -78.878372 
+	latitude = 30
+	longitude = 0
 	#RESET ALL----------------------------------------
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
 
@@ -52,14 +55,15 @@ def draw():
 	print >>sys.stderr, "RA="+str(RA)
 	print >>sys.stderr, "ORIENTATION="+str(ORIENTATION)
 	print data
-	latitude=float(data[0].split(",")[0])
-	longitude=float(data[0].split(",")[1])
+	#latitude=float(data[0].split(",")[0])
+	#longitude=float(data[0].split(",")[1])
 	altitude=float(data[0].split(",")[2])
 	if altitude < 0.0:
 		altitude=-altitude
 		latitude=-latitude
 		longitude=(longitude+360)%360-180
-	utc = datetime.fromtimestamp(float(data[0].split(",")[3]))
+	ts=float(data[0].split(",")[3])
+	utc = datetime.fromtimestamp(ts)
 	gst = sidereal.SiderealTime.fromDatetime ( utc )
 	lst = gst.lst(longitude)
 	ra_earth  = sidereal.hoursToRadians(lst.hours%24.0)
@@ -69,7 +73,7 @@ def draw():
 	longitude+=longitude_offset
 	#print data
 	#view_distance = 6*altitude/6367444.7 #5*orbit height/ earth radius
-	
+	print ts
 	glLoadIdentity()
 	glDisable(GL_LIGHTING)
 
@@ -91,7 +95,8 @@ def draw():
 	glPushMatrix()
 	glRotatef(dec_earth, 1.0, 0.0, 0.0)
 	glRotatef(ra_earth, 0.0, 1.0, 0.0)
-	
+	print "ra_earth: "+str(ra_earth)
+	print "dec_earth: "+str(dec_earth)
 	glPushMatrix()
 	glRotatef(90, 1.0, 0.0, 0.0)
 	glRotatef(180, 0.0, 1.0, 0.0)
@@ -102,12 +107,20 @@ def draw():
 	glRotatef(longitude, 0.0, 0.0, -1.0)
 	glCallList(1)
 	glPopMatrix()
+	
+	glRotatef(-90, 1.0, 0.0, 0.0)
+	glTranslatef(0, view_distance, 0)
+	glRotatef(ts%360, 0,0,1)
+	
+	glCallList(3)
 	glPopMatrix()
 
 	glDepthMask(False)
 	
 	# Draw the skybox
 	glCallList(2)
+	#glTranslatef(0.0, 5, 0)
+	#glCallList(3)
 	
 	# Re-enable lighting and depth test before we redraw the world
 	glEnable(GL_LIGHTING)
@@ -129,15 +142,17 @@ def get_input():
 		view_angle[2] -= 1.0
 	if keystate[K_RIGHT]: view_angle[1] -= 1.0
 	if keystate[K_LEFT]: view_angle[1] += 1.0
-	if keystate[K_UP] and view_angle[0] < 90: view_angle[0] += 1.0
-	if keystate[K_DOWN] and view_angle[0] > -90: view_angle[0] -= 1.0
+	if keystate[K_UP]: view_angle[0] += 1.0
+	if keystate[K_DOWN]: view_angle[0] -= 1.0
+	#if keystate[K_UP] and view_angle[0] < 90: view_angle[0] += 1.0
+	#if keystate[K_DOWN] and view_angle[0] > -90: view_angle[0] -= 1.0
 
 def main():
 	curtime=time()
 	while True:
 		get_input()
 		draw()
-		sleep(1)
+		#sleep(1)
 		lasttime=curtime
 		curtime=time()
 		print "fps: "+str(1.0/(curtime-lasttime))
