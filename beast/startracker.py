@@ -105,5 +105,6 @@ if __name__ == '__main__':
         if (img_name==''): break
         starttime=time()
         determine_rotation_matrix(img_name)
+        print img_name
         print "Time: "+str(time() - starttime)
         sys.stdout.flush()

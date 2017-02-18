@@ -14,5 +14,5 @@ echo -e "\nUsing ideal star locations:\n" &&
 echo -e "\nUsing astrometry centroiding:\n" &&
 [ `python gen_test_astrometry.py 2>&1| tee /dev/stderr | wc -l` -ge 1 ] &&
 echo -e "\nUsing OpenCV centroiding:\n" &&
-[ `ls -1 bg_sample/*.png | python startracker.py 2>&1| tee /dev/stderr | wc -l` -ge 1 ] &&
-python ../arimatic9000.py && display /tmp/arimatic9000
+[ `ls -1 bg_sample/*.png | python startracker.py 2>&1| tee /dev/stderr | wc -l` -ge 1 ]
+#python ../arimatic9000.py && display /tmp/arimatic9000

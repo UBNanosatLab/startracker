@@ -1,11 +1,11 @@
 #!/bin/bash
 
-echo "POS_ERR_SIGMA=1.7" > calibration/calibration.txt
+echo "POS_ERR_SIGMA=1.8" > calibration/calibration.txt
 echo "IMAGE_MAX=255" >> calibration/calibration.txt
 echo "PSF_RADIUS=3.5" >> calibration/calibration.txt
 #Use MIN_MAG=None with real startracker
 echo "MIN_MAG=4.6" >> calibration/calibration.txt
-echo "NUM_FALSE_STARS=6" >> calibration/calibration.txt
+echo "NUM_FALSE_STARS=7" >> calibration/calibration.txt
 
 #calculate a noise threshold such that there is an average of
 #NUM_FALSE_PIXELS pixels randomly above the threshold per image
