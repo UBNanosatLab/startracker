@@ -21,9 +21,11 @@ cv2.imwrite(PROJECT_ROOT+"beast/median_image.png",median_image)
 for n in range(0, num_images):
 	cv2.imwrite("calibration/"+image_names[n],np.clip(images[n]-median_image,a_min=0,a_max=255).astype(np.uint8))
 
-#median is robust to stars, so use that rather than mean to calculate variance
-#use the experementally determined percentile value of 70 to make it come out like it would have if we had used median
-IMAGE_VARIANCE=np.percentile([(n-median_image)**2 for n in images],70)
-BRIGHT_ERR_SIGMA=poisson.ppf(1-(3.0*NUM_FALSE_PIXELS)/(median_image.size),IMAGE_VARIANCE)/IMAGE_VARIANCE
+#stars arent that big a deal, but leaving them out can't hurt (2% more accurate)
+IMAGE_VARIANCE=np.ma.average((images-median_image)**2,weights=images<median_image)
+#IMAGE_VARIANCE=np.var(images-median_image)
+
+#set a threshold so that we have a PROB_FALSE_STAR chance of a star apearing above the threshold per image
+BRIGHT_THRESH=poisson.ppf(1+np.log(1-PROB_FALSE_STAR)/(median_image.size/3.0),IMAGE_VARIANCE)+1-IMAGE_VARIANCE
 print "IMAGE_VARIANCE="+str(IMAGE_VARIANCE)
-print "BRIGHT_ERR_SIGMA="+str(BRIGHT_ERR_SIGMA)
+print "BRIGHT_THRESH="+str(BRIGHT_THRESH)

@@ -98,14 +98,14 @@ def mag2min(mag):
 def mag2max(mag):
 	return mag2val(mag)+MAG2VAL_ABOVE*MAG_BOUND_SIGMA
 
-#why IMAGE_VARIANCE*BRIGHT_ERR_SIGMA*2?
-#since the brightness threshold of the image centroiding program is IMAGE_VARIANCE*BRIGHT_ERR_SIGMA
-#we need to add an extra BRIGHT_ERR_SIGMA to make sure star brightnesses never drops below that amount
+#why BRIGHT_THRESH*2?
+#since the brightness threshold of the image centroiding program is BRIGHT_THRESH
+#we need to add an extra BRIGHT_THRESH to make sure star brightnesses never drops below that amount
 def filterbrightness():
 	global stardb
 	sd=np.array(stardb.values(),dtype = object)
 	#estimate min mag from reference image
-	minbright=IMAGE_VARIANCE*BRIGHT_ERR_SIGMA*2
+	minbright=BRIGHT_THRESH*2
 	if(MIN_MAG!=None):
 		for i in sd:
 			if i[1]>MIN_MAG:
@@ -209,7 +209,7 @@ def transpose_distance(oldstars):
 
 def transpose_brightness(oldstars):
 	global stardb
-	err=IMAGE_VARIANCE*BRIGHT_ERR_SIGMA
+	err=BRIGHT_THRESH
 	newstars=[]
 	clipmax=lambda s: s if s<IMAGE_MAX else IMAGE_MAX
 	if(MIN_MAG!=None):

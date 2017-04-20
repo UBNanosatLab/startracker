@@ -207,12 +207,14 @@ namespace beast {
 			return false;
 		}
 		void __attribute__ ((used)) search_all() {
+			//search every possible combination of four stars in the list given
 			for (int d=3;d<stars.size();d++)
 			for (int c=2;c<d;c++)
 			for (int b=1;b<c;b++)
 			for (int a=0;a<b;a++) querydb(a,b,c,d);
 		}
 		bool __attribute__ ((used)) search_pilot() {
+			//search only those combinations which contain the first star that was added
 			int i,j,k,l;
 			int max=stars.size();
 			for (l=pilot+3; l<max;l++)

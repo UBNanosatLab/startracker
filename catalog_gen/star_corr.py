@@ -2,6 +2,10 @@ from beast.getstars import *
 from os import path
 from sys import stderr
 
+#import config
+#execfile(config.PROJECT_ROOT+"catalog_gen/calibration/calibration.txt")
+
+
 def median_line(x,y):
 	minerr=np.Inf
 	for j in range(1,len(x)):
@@ -114,7 +118,8 @@ if __name__ == '__main__':
 				bestimage=sys.argv[i]
 			db_val+=a
 			img_val+=b
-			db_img_dist+=c
+			#db_img_dist+=c
+			db_img_dist+=[c[i]**2-IMAGE_VARIANCE/b[i] for i in range(0,len(c))]
 	MAG2VAL_M,MAG2VAL_B=median_line(db_val,img_val)
 	#MAG2VAL_M,MAG2VAL_B=np.linalg.lstsq(np.vstack([db_val, np.ones(len(db_val))]).T,img_val)[0]
 	#MAG2VAL_STDEV_M,MAG2VAL_STDEV_B=median_line(db_val,np.abs(img_val-(np.multiply(MAG2VAL_M,db_val)+MAG2VAL_B)))
@@ -135,9 +140,16 @@ if __name__ == '__main__':
 	plt.plot(db_val, np.multiply(MAG2VAL_M,db_val)+MAG2VAL_B+MAG2VAL_BELOW*MAG_BOUND_SIGMA, 'g')
 	plt.show()
 
-	POS_ERR_STDEV=np.median(db_img_dist)
-	print "POS_ERR_STDEV="+str(POS_ERR_STDEV)
-	print "ARC_ERR="+str(PIXSCALE*POS_ERR_STDEV*POS_ERR_SIGMA)
+	#POS_ERR_STDEV=np.median(db_img_dist)
+	CATALOG_POS_VARIANCE=max(np.mean(db_img_dist),0)
+	print "CATALOG_POS_VARIANCE="+str(CATALOG_POS_VARIANCE)
+	#there is a lot going on here. 
+	#we take the square root of the position variance due to catalog error + the
+	#worst case position variance due to image noise
+	#divide the whole thing by square root of two to correct for a mistake in the code
+	#the code treats total err as 2*individual error, when in fact it sqrt(2)*individual error
+	#this also lets us avoid square roots in the performance critical inner loop
+	print "ARC_ERR="+str(PIXSCALE*POS_ERR_SIGMA*(np.sqrt((CATALOG_POS_VARIANCE+IMAGE_VARIANCE/BRIGHT_THRESH)/2)))
 	print "MAG2VAL_M="+str(MAG2VAL_M)
 	print "MAG2VAL_B="+str(MAG2VAL_B)
 	print "MAG2VAL_ABOVE="+str(MAG2VAL_ABOVE)

@@ -7,9 +7,8 @@ echo "PSF_RADIUS=3.5" >> calibration/calibration.txt
 echo "MIN_MAG=4.6" >> calibration/calibration.txt
 echo "NUM_FALSE_STARS=7" >> calibration/calibration.txt
 
-#calculate a noise threshold such that there is an average of
-#NUM_FALSE_PIXELS pixels randomly above the threshold per image
-echo "NUM_FALSE_PIXELS=2" >> calibration/calibration.txt
+#Set threshold so that there is a 1% chance of a star apearing above the threshold per image
+echo "PROB_FALSE_STAR=0.01" >> calibration/calibration.txt
 
 #50 percent of stars fall within 1 sigma. This should probably be at least 2
 echo "MAG_BOUND_SIGMA=2" >> calibration/calibration.txt
