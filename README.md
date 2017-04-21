@@ -9,7 +9,7 @@ sudo wget http://data.astrometry.net/4200/index-4212.fits
 cd
 git clone https://github.com/UBNanosatLab/startracker.git
 
-cd software-startracker
+cd startracker
 python setup.py
 ~~~~
 You must log out and then log back in for the changes in setup.py to take effect
