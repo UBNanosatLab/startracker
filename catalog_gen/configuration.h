@@ -76,7 +76,7 @@ namespace configuration
 	std::ostream& operator << ( std::ostream& outs, const data& d )
 	{
 		data::const_iterator iter;
-		for (iter = d.begin(); iter != d.end(); iter++)
+		for (iter = d.begin(); iter != d.end(); ++iter)
 			outs << iter->first << " = " << iter->second << std::endl;
 		return outs;
 	}

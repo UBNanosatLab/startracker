@@ -39,7 +39,7 @@ def rotation_matrix(axis, theta):
 #xyz_dist takes xyz of two points
 #returns distance in degrees
 def xyz_dist(xyz1,xyz2):
-	return math.degrees(math.acos(np.clip(np.dot(xyz1,xyz2),a_min=-1,a_max=1)))
+	return math.degrees(math.asin(np.linalg.norm(np.cross(xyz1,xyz2))))
 #star_dist takes ids of two stars,returns distance between them in arcseconds
 def star_dist(s1,s2):
 	return 3600*xyz_dist(stardb[s1][4:7],stardb[s2][4:7])

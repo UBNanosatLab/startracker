@@ -23,7 +23,7 @@ def xyz_points(image_stars_info):
         star_points.append([x,y,z])
     return star_points
 
-def group_stars(star_points ,false_stars = NUM_FALSE_STARS):
+def group_stars(star_points ,false_stars = MAX_FALSE_STARS):
     if (len(star_points)<4):
         raise NoMatchesFound("Not enough stars")
     if (len(star_points)-4<false_stars):

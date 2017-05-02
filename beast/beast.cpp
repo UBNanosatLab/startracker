@@ -55,10 +55,11 @@ namespace beast {
 		int hipid;
 	};
 
-	int *map,fd;
+	int *map;
+	int fd;
 	struct constellation *starptr;
 	int PARAM1,PARAM2,PARAM3,NUMCONST,IMG_X,IMG_Y;
-	double DEG_X,DEG_Y,PIXX_TANGENT,PIXY_TANGENT,ARC_ERR;
+	double DEG_X,DEG_Y,ARC_ERR;
 	int i1_max,i2_max,i3_max;
 	size_t mapsize,dbsize;
 
@@ -128,7 +129,12 @@ namespace beast {
 		// Un-mmaping doesn't close the file, so we still need to do that.
 		close(fd);
 	}
-
+	double dist3(double x1,double x2,double y1,double y2,double z1,double z2) {
+		double a=x1*y2 - x2*y1;
+		double b=x1*z2 - x2*z1;
+		double c=y1*z2 - y2*z1;
+		return sqrt(a*a+b*b+c*c);
+	}
 	bool compare_mag (const star &s1, const star &s2) {return (s1.mag > s2.mag);}
 	bool compare_starnum (const star &s1, const star &s2) {return (s1.starnum < s2.starnum);}
 	class star_query {
@@ -150,14 +156,17 @@ namespace beast {
 			s.starnum=stars.size();
 			s.magnum=s.starnum;
 			s.hipid=0;
-			px=j*IMG_X/(2*tan(DEG_X*PI/(180*2)));
-			py=k*IMG_Y/(2*tan(DEG_Y*PI/(180*2)));
 
 			//insert into list sorted by magnitude
-			for (;s.magnum>0&&compare_mag(s,stars[s.magnum-1]);s.magnum--);
+			stars.resize(s.magnum+1);
+			while (s.magnum>0&&compare_mag(s,stars[s.magnum-1])){
+				stars[s.magnum]=stars[s.magnum-1];
+				stars[s.magnum].magnum++;
+				s.magnum--;
+			}
+			stars[s.magnum]=s;
 			if (s.starnum==0) pilot=0;
 			else if (s.magnum<=pilot) pilot++;
-			stars.insert(stars.begin()+s.magnum,s);
 		}
 		void __attribute__ ((used)) sort_mag() {sort(stars.begin(), stars.end(), compare_mag);}
 		void __attribute__ ((used)) sort_starnum() {sort(stars.begin(), stars.end(), compare_starnum);}
@@ -165,12 +174,12 @@ namespace beast {
 			im_0=-1;im_1=-1;im_2=-1;im_3=-1;
 			db_0=-1;db_1=-1;db_2=-1;db_3=-1;
 			double p0,p1,p2,p3,p4,p5;
-			p0=(3600*180.0/PI)*acos(stars[a].x*stars[b].x+stars[a].y*stars[b].y+stars[a].z*stars[b].z);
-			p1=(3600*180.0/PI)*acos(stars[a].x*stars[c].x+stars[a].y*stars[c].y+stars[a].z*stars[c].z);
-			p2=(3600*180.0/PI)*acos(stars[a].x*stars[d].x+stars[a].y*stars[d].y+stars[a].z*stars[d].z);
-			p3=(3600*180.0/PI)*acos(stars[b].x*stars[c].x+stars[b].y*stars[c].y+stars[b].z*stars[c].z);
-			p4=(3600*180.0/PI)*acos(stars[b].x*stars[d].x+stars[b].y*stars[d].y+stars[b].z*stars[d].z);
-			p5=(3600*180.0/PI)*acos(stars[c].x*stars[d].x+stars[c].y*stars[d].y+stars[c].z*stars[d].z);
+			p0=(3600*180.0/PI)*asin(dist3(stars[a].x,stars[b].x,stars[a].y,stars[b].y,stars[a].z,stars[b].z));
+			p1=(3600*180.0/PI)*asin(dist3(stars[a].x,stars[c].x,stars[a].y,stars[c].y,stars[a].z,stars[c].z));
+			p2=(3600*180.0/PI)*asin(dist3(stars[a].x,stars[d].x,stars[a].y,stars[d].y,stars[a].z,stars[d].z));
+			p3=(3600*180.0/PI)*asin(dist3(stars[b].x,stars[c].x,stars[b].y,stars[c].y,stars[b].z,stars[c].z));
+			p4=(3600*180.0/PI)*asin(dist3(stars[b].x,stars[d].x,stars[b].y,stars[d].y,stars[b].z,stars[d].z));
+			p5=(3600*180.0/PI)*asin(dist3(stars[c].x,stars[d].x,stars[c].y,stars[d].y,stars[c].z,stars[d].z));
 			int i1=(int)(p0/ARC_ERR+.5)%PARAM1;i1=(i1/2)%i1_max;
 			int i2=(int)(p1/ARC_ERR+.5)%PARAM2;i2=(i2/2)%i2_max;
 			int i3=(int)(p2/ARC_ERR+.5)%PARAM3;i3=(i3/2)%i3_max;

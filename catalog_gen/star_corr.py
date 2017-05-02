@@ -140,16 +140,15 @@ if __name__ == '__main__':
 	plt.plot(db_val, np.multiply(MAG2VAL_M,db_val)+MAG2VAL_B+MAG2VAL_BELOW*MAG_BOUND_SIGMA, 'g')
 	plt.show()
 
-	#POS_ERR_STDEV=np.median(db_img_dist)
-	CATALOG_POS_VARIANCE=max(np.mean(db_img_dist),0)
-	print "CATALOG_POS_VARIANCE="+str(CATALOG_POS_VARIANCE)
+	POS_VARIANCE=max(np.mean(db_img_dist),0)
+	print "POS_VARIANCE="+str(POS_VARIANCE)
 	#there is a lot going on here. 
 	#we take the square root of the position variance due to catalog error + the
 	#worst case position variance due to image noise
 	#divide the whole thing by square root of two to correct for a mistake in the code
 	#the code treats total err as 2*individual error, when in fact it sqrt(2)*individual error
 	#this also lets us avoid square roots in the performance critical inner loop
-	print "ARC_ERR="+str(PIXSCALE*POS_ERR_SIGMA*(np.sqrt((CATALOG_POS_VARIANCE+IMAGE_VARIANCE/BRIGHT_THRESH)/2)))
+	print "ARC_ERR="+str(PIXSCALE*POS_ERR_SIGMA*(np.sqrt((POS_VARIANCE+IMAGE_VARIANCE/BRIGHT_THRESH)/2)))
 	print "MAG2VAL_M="+str(MAG2VAL_M)
 	print "MAG2VAL_B="+str(MAG2VAL_B)
 	print "MAG2VAL_ABOVE="+str(MAG2VAL_ABOVE)

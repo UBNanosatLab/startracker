@@ -4,12 +4,18 @@ import sys
 from numpy import clip
 
 #re
-def dot(s1_id,s2_id):
+def sdist3(s1_id,s2_id):
 	global stardb
-	xdot=stardb[int(s1_id)][0]*stardb[int(s2_id)][0]
-	ydot=stardb[int(s1_id)][1]*stardb[int(s2_id)][1]
-	zdot=stardb[int(s1_id)][2]*stardb[int(s2_id)][2]
-	return clip(xdot+ydot+zdot,a_min=-1,a_max=1)
+	x1=stardb[int(s1_id)][0]
+	y1=stardb[int(s1_id)][1]
+	z1=stardb[int(s1_id)][2]
+	x2=stardb[int(s2_id)][0]
+	y2=stardb[int(s2_id)][1]
+	z2=stardb[int(s2_id)][2]
+	a=x1*y2 - x2*y1
+	b=x1*z2 - x2*z1
+	c=y1*z2 - y2*z1
+	return sqrt(a*a+b*b+c*c)
 
 
 stardb={}
@@ -27,19 +33,19 @@ starfile = open("/dev/stdin")
 for line in starfile.readlines():
 	s=line.rstrip(' \t\r\n').split(",")
 	newline=[]
-	cos1=dot(s[0],s[1])
-	cos2=dot(s[0],s[2])
-	cos3=dot(s[0],s[3])
-	cos4=dot(s[1],s[2])
-	cos5=dot(s[1],s[3])
-	cos6=dot(s[2],s[3])
+	sin1=sdist3(s[0],s[1])
+	sin2=sdist3(s[0],s[2])
+	sin3=sdist3(s[0],s[3])
+	sin4=sdist3(s[1],s[2])
+	sin5=sdist3(s[1],s[3])
+	sin6=sdist3(s[2],s[3])
 	
-	newline.append(str(3600*math.degrees(math.acos(cos1))))
-	newline.append(str(3600*math.degrees(math.acos(cos2))))
-	newline.append(str(3600*math.degrees(math.acos(cos3))))
-	newline.append(str(3600*math.degrees(math.acos(cos4))))
-	newline.append(str(3600*math.degrees(math.acos(cos5))))
-	newline.append(str(3600*math.degrees(math.acos(cos6))))
+	newline.append(str(3600*math.degrees(math.asin(sin1))))
+	newline.append(str(3600*math.degrees(math.asin(sin2))))
+	newline.append(str(3600*math.degrees(math.asin(sin3))))
+	newline.append(str(3600*math.degrees(math.asin(sin4))))
+	newline.append(str(3600*math.degrees(math.asin(sin5))))
+	newline.append(str(3600*math.degrees(math.asin(sin6))))
 	
 	newline.append(s[0])
 	newline.append(s[1])

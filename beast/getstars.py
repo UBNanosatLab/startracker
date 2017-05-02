@@ -305,3 +305,7 @@ def visualize(image,contours):
             print >>sys.stderr, "Single pixel star"
     return image
 
+if __name__ == '__main__':
+	for s in extract_stars(cv2.imread(sys.argv[1])):
+		print str(s[0])+" "+str(s[1])+" "+str(s[2])
+	
