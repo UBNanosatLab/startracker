@@ -1,4 +1,5 @@
 # Clean, depend, and make
 # bmake install on success
 swig -python -c++ beast.i
+swig -python -c++ rst.i
 make

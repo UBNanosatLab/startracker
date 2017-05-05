@@ -141,7 +141,7 @@ namespace rst {
 				if(oldstars.size()>(unsigned int)MAX_STARS) oldstars.resize(MAX_STARS);
 			}
 		}
-		double dist3(double x1,double x2,double y1,double y2,double z1,double z2) {
+		double __attribute__ ((used)) dist3(double x1,double x2,double y1,double y2,double z1,double z2) {
 			double a=x1*y2 - x2*y1;
 			double b=x1*z2 - x2*z1;
 			double c=y1*z2 - y2*z1;
@@ -155,7 +155,7 @@ namespace rst {
 			sort(oldstars.begin(), oldstars.end(), compare_starnum);
 			sort(newstars.begin(), newstars.end(), compare_starnum);
 		}
-		void add_entry(int mapidx,int curr_const) {
+		void  __attribute__ ((used)) add_entry(int mapidx,int curr_const) {
 			int *staridx;
 			for (staridx=&map[mapidx];*staridx!=-1;staridx=&(starptr[*staridx].last));
 			if (staridx!=&(starptr[curr_const].last)) *staridx=curr_const;
@@ -311,7 +311,7 @@ namespace rst {
 		//replace doubles with floats(where 7 digits are enough) (x2-4)
 		//Perform triad method using both stars as pilot stars, and return the better of the two
 		
-		constellation_score weighted_triad(unsigned char old_s1,unsigned char old_s2,unsigned char new_s1,unsigned char new_s2){
+		constellation_score __attribute__ ((used)) weighted_triad(unsigned char old_s1,unsigned char old_s2,unsigned char new_s1,unsigned char new_s2){
 			//v=A*w
 			double wa1=oldstars[old_s1].x,wa2=oldstars[old_s1].y,wa3=oldstars[old_s1].z;
 			double wb1=oldstars[old_s2].x,wb2=oldstars[old_s2].y,wb3=oldstars[old_s2].z;

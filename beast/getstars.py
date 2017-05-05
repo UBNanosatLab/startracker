@@ -36,7 +36,7 @@ def body2ECI_RA_DEC_ORI(body2ECI):
 	#rotation about the camera axis (-180 to +180)
 	print >>sys.stderr, "ORIENTATION="+str(ORIENTATION)
     
-def rigid_transform_3D(A, B):
+def rigid_transform_3D(A, B, weight=None):
     """
     Takes in two matrices of points and finds the attitude matrix needed to
     transform one onto the other
@@ -49,9 +49,10 @@ def rigid_transform_3D(A, B):
         attitude_matrix: returned as a numpy matrix
     """
     assert len(A) == len(B)
-
+    if (weight == None):
+        weight=np.array([1]*len(A))
     # dot is matrix multiplication for array
-    H =  np.dot(np.transpose(A),B)
+    H =  np.dot(np.transpose(A)*weight,B)
 
 
     #calculate attitude matrix
