@@ -15,6 +15,7 @@
 #include <assert.h>
 
 #define PI           3.14159265358979323846  /* pi */
+#define TWOPI        6.28318530717958647693
 
 namespace rst {
 	struct constellation {
@@ -39,10 +40,10 @@ namespace rst {
 	
 	struct  constellation_score {
 		double totalscore;
-		unsigned char old_s1;
-		unsigned char old_s2;
-		unsigned char new_s1;
-		unsigned char new_s2;
+		unsigned char oldid1;
+		unsigned char oldid2;
+		unsigned char newid1;
+		unsigned char newid2;
 		//id=new
 		//value=old
 		std::vector<int> id_map;
@@ -78,7 +79,6 @@ namespace rst {
 	}
 	bool compare_mag (const star &s1, const star &s2) {return (s1.mag > s2.mag);}
 	bool compare_totalscore (const constellation_score &cs1, const constellation_score &cs2) {return (cs1.totalscore > cs2.totalscore);}
-	bool compare_starnum (const star &s1, const star &s2) {return (s1.starnum < s2.starnum);}
 	class star_query {
 	public:
 		std::vector<star> oldstars;	
@@ -98,7 +98,12 @@ namespace rst {
 		
 		unsigned char *img_mask;
 		struct constellation *starptr;
-		void __attribute__ ((used)) add_star(double px, double py, double mag, int newstar) {
+		//rotation matrix
+		double R11,R12,R13;
+		double R21,R22,R23;
+		double R31,R32,R33;
+		
+		void __attribute__ ((used)) add_star(double px, double py, double mag) {
 			star s;
 
 			double j=PIXX_TANGENT*px; //j=(y/x)
@@ -113,33 +118,28 @@ namespace rst {
 			s.px=px;
 			s.py=py;
 			//insert into list sorted by magnitude
-			if (newstar) {
-				s.magnum=newstars.size();
-				if (s.magnum==0) addednewstars=0;
-				s.starnum=addednewstars;
-				addednewstars++;
-				newstars.resize(s.magnum+1);
-				while (s.magnum>0&&compare_mag(s,newstars[s.magnum-1])){
-					newstars[s.magnum]=newstars[s.magnum-1];
-					newstars[s.magnum].magnum++;
-					s.magnum--;
-				}
-				newstars[s.magnum]=s;
-				if(newstars.size()>(unsigned int)MAX_STARS) newstars.resize(MAX_STARS);
-			} else {
-				s.magnum=oldstars.size();
-				if (s.magnum==0) addedoldstars=0;
-				s.starnum=addedoldstars;
-				addedoldstars++;
-				oldstars.resize(s.magnum+1);
-				while (s.magnum>0&&compare_mag(s,oldstars[s.magnum-1])){
-					oldstars[s.magnum]=oldstars[s.magnum-1];
-					oldstars[s.magnum].magnum++;
-					s.magnum--;
-				}
-				oldstars[s.magnum]=s;
-				if(oldstars.size()>(unsigned int)MAX_STARS) oldstars.resize(MAX_STARS);
+			s.magnum=newstars.size();
+			if (s.magnum==0) addednewstars=0;
+			s.starnum=addednewstars;
+			addednewstars++;
+			newstars.resize(s.magnum+1);
+			while (s.magnum>0&&compare_mag(s,newstars[s.magnum-1])){
+				newstars[s.magnum]=newstars[s.magnum-1];
+				newstars[s.magnum].magnum++;
+				s.magnum--;
 			}
+			newstars[s.magnum]=s;
+			if(newstars.size()>(unsigned int)MAX_STARS) newstars.resize(MAX_STARS);
+		}
+		void __attribute__ ((used)) flip() {
+				addedoldstars=addednewstars;
+				oldstars=newstars;
+				addednewstars=0;
+				newstars.clear();
+				winner_scores.clear();
+				winner_id_map.clear();
+				c_scores.clear();
+				
 		}
 		double __attribute__ ((used)) dist3(double x1,double x2,double y1,double y2,double z1,double z2) {
 			double a=x1*y2 - x2*y1;
@@ -147,25 +147,39 @@ namespace rst {
 			double c=y1*z2 - y2*z1;
 			return sqrt(a*a+b*b+c*c);
 		}
-		void __attribute__ ((used)) sort_mag() {
-			sort(oldstars.begin(), oldstars.end(), compare_mag);
-			sort(newstars.begin(), newstars.end(), compare_mag);
-		}
-		void __attribute__ ((used)) sort_starnum() {
-			sort(oldstars.begin(), oldstars.end(), compare_starnum);
-			sort(newstars.begin(), newstars.end(), compare_starnum);
-		}
 		void  __attribute__ ((used)) add_entry(int mapidx,int curr_const) {
 			int *staridx;
 			for (staridx=&map[mapidx];*staridx!=-1;staridx=&(starptr[*staridx].last));
 			if (staridx!=&(starptr[curr_const].last)) *staridx=curr_const;
 		}
+		void __attribute__ ((used)) set_mask(int x,int y, int id, double score){
+			if (score>0) {
+				//has this pixel already been assigned to a different star?
+				unsigned char id2=img_mask[(x+IMG_X/2)+(y+IMG_Y/2)*IMG_X];
+				if (id2!=255){
+					double sigma_sq2=newstars[id2].sigma_sq+IMAGE_VARIANCE/BRIGHT_THRESH;//change for lost in space.
+					double maxdist_sq2=-sigma_sq2*(log(sigma_sq2)+MATCH_VALUE);
+					double px2=newstars[id2].px;
+					double py2=newstars[id2].py;
+					double a2=(x+.5-px2);
+					double b2=(y+.5-py2);
+					double score2 = (maxdist_sq2-(a2*a2+b2*b2))/(2*sigma_sq2);
+					if (score>score2){
+						img_mask[(x+IMG_X/2)+(y+IMG_Y/2)*IMG_X]=id;
+					}
+				} else {
+					img_mask[(x+IMG_X/2)+(y+IMG_Y/2)*IMG_X]=id;
+				}
+			}
+		}
 		
 		double __attribute__ ((used)) search_rel() {
-
-
 			numoldstars=oldstars.size();
 			numnewstars=newstars.size();
+			
+			//nope
+			if (numoldstars<2||numnewstars<2) return 0.0;
+			
 			numconst=(numoldstars*(numoldstars-1))/2;
 			mapsize=((3600*(sqrt(DEG_X*DEG_X+DEG_Y*DEG_Y))/ARC_ERR_REL)+1);
 			dbsize = mapsize*sizeof(int) + numconst*sizeof(struct constellation);
@@ -202,38 +216,19 @@ namespace rst {
 			memset(img_mask, 255, IMG_X*IMG_Y);
 			
 			//generate image mask
-			for (int i=0;i<numnewstars;i++){
+			for (int id=0;id<numnewstars;id++){
 				//assume the dimmest possible star since we dont know the brightness of the other image
-				double sigma_sq=newstars[i].sigma_sq+IMAGE_VARIANCE/BRIGHT_THRESH;//change for lost in space.
+				double sigma_sq=newstars[id].sigma_sq+IMAGE_VARIANCE/BRIGHT_THRESH;//change for lost in space.
 				double maxdist_sq=-sigma_sq*(log(sigma_sq)+MATCH_VALUE);
 				double maxdist=sqrt(maxdist_sq);
-				double px=newstars[i].px;
-				double py=newstars[i].py;
-				int xmin=std::max(-IMG_X/2.0,(px-maxdist));
-				int xmax=std::min(IMG_X/2.0,px+maxdist+1);
-				int ymin=std::max(-IMG_Y/2.0,(py-maxdist));
-				int ymax=std::min(IMG_Y/2.0,(py+maxdist+1));
-				for(int x=xmin;x<xmax;x++){
-					for (int y=ymin;y<ymax;y++) {
-						double a=(x+.5-px);
-						double b=(y+.5-py);
-						double score = (maxdist_sq-(a*a+b*b))/(2*sigma_sq);
-						if (score>0) {
-							unsigned char id=img_mask[(x+IMG_X/2)+(y+IMG_Y/2)*IMG_X];
-							if (id!=255){
-								double sigma_sq2=newstars[id].sigma_sq+IMAGE_VARIANCE/BRIGHT_THRESH;//change for lost in space.
-								double maxdist_sq2=-sigma_sq2*(log(sigma_sq2)+MATCH_VALUE);
-								double px2=newstars[id].px;
-								double py2=newstars[id].py;
-								double a2=(x+.5-px2);
-								double b2=(y+.5-py2);
-								double score2 = (maxdist_sq2-(a2*a2+b2*b2))/(2*sigma_sq2);
-								if (score>score2) img_mask[(x+IMG_X/2)+(y+IMG_Y/2)*IMG_X]=i;
-							} else {
-								img_mask[(x+IMG_X/2)+(y+IMG_Y/2)*IMG_X]=i;
-							}
-						}
-					}
+				int xmin=std::max(-IMG_X/2.0,(newstars[id].px-maxdist));
+				int xmax=std::min(IMG_X/2.0,newstars[id].px+maxdist+1);
+				int ymin=std::max(-IMG_Y/2.0,(newstars[id].py-maxdist));
+				int ymax=std::min(IMG_Y/2.0,(newstars[id].py+maxdist+1));
+				for(int x=xmin;x<xmax;x++) for (int y=ymin;y<ymax;y++) {
+					double a=(x+.5-newstars[id].px);
+					double b=(y+.5-newstars[id].py);
+					set_mask(x,y,id,(maxdist_sq-(a*a+b*b))/(2*sigma_sq));
 				}
 			}
 			//use weighted triad
@@ -247,8 +242,10 @@ namespace rst {
 					if (mmi<0) mmi+=mapsize;
 					for (int staridx=map[mmi];staridx!=-1;staridx=starptr[staridx].last) {
 						if (fabs(starptr[staridx].p-p)<ARC_ERR_REL){
-							c_scores.push_back(weighted_triad(starptr[staridx].s1,starptr[staridx].s2,j,i));
-							c_scores.push_back(weighted_triad(starptr[staridx].s1,starptr[staridx].s2,i,j));
+							weighted_triad(oldstars[starptr[staridx].s1],oldstars[starptr[staridx].s2],newstars[j],newstars[i]);
+							add_score_rel(starptr[staridx].s1,starptr[staridx].s2,j,i);
+							weighted_triad(oldstars[starptr[staridx].s1],oldstars[starptr[staridx].s2],newstars[i],newstars[j]);
+							add_score_rel(starptr[staridx].s1,starptr[staridx].s2,i,j);
 						}
 					}
 				}
@@ -275,13 +272,13 @@ namespace rst {
 				}
 				
 				double bestscore=c_scores[0].totalscore;
-				unsigned char old_s1=c_scores[0].old_s1;
-				unsigned char old_s2=c_scores[0].old_s2;
-				unsigned char new_s1=c_scores[0].new_s1;
-				unsigned char new_s2=c_scores[0].new_s2;
+				unsigned char oldid1=c_scores[0].oldid1;
+				unsigned char oldid2=c_scores[0].oldid2;
+				unsigned char newid1=c_scores[0].newid1;
+				unsigned char newid2=c_scores[0].newid2;
 				
 				for(unsigned int i=1;i<c_scores.size();i++) {
-					if (c_scores[i].id_map[new_s1]!=old_s1&&c_scores[i].id_map[new_s2]!=old_s2){
+					if (c_scores[i].id_map[newid1]!=oldid1&&c_scores[i].id_map[newid2]!=oldid2){
 						p_match+=exp(c_scores[i].totalscore-bestscore);
 					}
 				}
@@ -309,14 +306,15 @@ namespace rst {
 		//tips to improve speed: 
 		//reduce max stars (x2-4)
 		//replace doubles with floats(where 7 digits are enough) (x2-4)
-		//Perform triad method using both stars as pilot stars, and return the better of the two
+		//Perform triad method using both stars as pilot stars, and 
+		//set the rotation matrix to the weighted interpolation of the two
 		
-		constellation_score __attribute__ ((used)) weighted_triad(unsigned char old_s1,unsigned char old_s2,unsigned char new_s1,unsigned char new_s2){
+		void __attribute__ ((used)) weighted_triad(star &old_s1,star &old_s2,star &new_s1,star &new_s2){
 			//v=A*w
-			double wa1=oldstars[old_s1].x,wa2=oldstars[old_s1].y,wa3=oldstars[old_s1].z;
-			double wb1=oldstars[old_s2].x,wb2=oldstars[old_s2].y,wb3=oldstars[old_s2].z;
-			double va1=newstars[new_s1].x,va2=newstars[new_s1].y,va3=newstars[new_s1].z;
-			double vb1=newstars[new_s2].x,vb2=newstars[new_s2].y,vb3=newstars[new_s2].z;
+			double wa1=old_s1.x,wa2=old_s1.y,wa3=old_s1.z;
+			double wb1=old_s2.x,wb2=old_s2.y,wb3=old_s2.z;
+			double va1=new_s1.x,va2=new_s1.y,va3=new_s1.z;
+			double vb1=new_s2.x,vb2=new_s2.y,vb3=new_s2.z;
 			
 			double wa=sqrt(wa1*wa1+wa2*wa2+wa3*wa3);
 			double wb=sqrt(wb1*wb1+wb2*wb2+wb3*wb3);
@@ -386,8 +384,8 @@ namespace rst {
 			
 			//use weights based on magnitude
 			//weighted triad
-			double weightA=1.0/(POS_VARIENCE_REL+IMAGE_VARIANCE/oldstars[old_s1].mag+IMAGE_VARIANCE/newstars[new_s1].mag);
-			double weightB=1.0/(POS_VARIENCE_REL+IMAGE_VARIANCE/oldstars[old_s2].mag+IMAGE_VARIANCE/newstars[new_s2].mag);
+			double weightA=1.0/(POS_VARIENCE_REL+IMAGE_VARIANCE/old_s1.mag+IMAGE_VARIANCE/new_s1.mag);
+			double weightB=1.0/(POS_VARIENCE_REL+IMAGE_VARIANCE/old_s2.mag+IMAGE_VARIANCE/new_s2.mag);
 			//weightA=0;
 			//weightB=1.0-weightA;
 			double sumAB=weightA+weightB;
@@ -416,10 +414,6 @@ namespace rst {
 			cx=cx/mx;
 			sx=sx/mx;
 			
-			double R11,R12,R13;
-			double R21,R22,R23;
-			double R31,R32,R33;
-			
 			R11=cy*cz;
 			R12=cz*sx*sy - cx*sz;
 			R13=sx*sz + cx*cz*sy;
@@ -431,13 +425,13 @@ namespace rst {
 			R31=-sy;
 			R32=cy*sx;
 			R33=cx*cy;
-
-
+		}
+		void __attribute__ ((used)) add_score_rel(unsigned char oldid1,unsigned char oldid2,unsigned char newid1,unsigned char newid2){
 			constellation_score cs;
-			cs.old_s1=old_s1;
-			cs.old_s2=old_s2;
-			cs.new_s1=new_s1;
-			cs.new_s2=new_s2;
+			cs.oldid1=oldid1;
+			cs.oldid2=oldid2;
+			cs.newid1=newid1;
+			cs.newid2=newid2;
 			
 			//cargo cult vector allocation (it makes valgrind shut up, don't question it)
 			for (int i=0;i<numnewstars;i++){
@@ -472,43 +466,43 @@ namespace rst {
 				}
 			}
 			for(int n=0;n<numnewstars;n++) cs.totalscore+=cs.scores[n];
-			return cs;
+			c_scores.push_back(cs);
 		}
 	};
 }
 int main (int argc, char** argv) {
 	std::cout.precision(12);
-	if (argc!=3){
-		std::cout<<"Usage: ./rst xy_mag_old.txt xy_mag_new.txt"<<std::endl<<std::flush;
+	if (argc<4){
+		std::cout<<"Usage: ./rst xy_mag_*.txt"<<std::endl<<std::flush;
 		exit(0);
 	}
 	rst::load_db();
 	rst::star_query sq;
 	double px,py,mag;
 	std::string line;
-
-	std::ifstream xy_mag_old(argv[1]);
-	while (!xy_mag_old.eof()) {
-		std::getline(xy_mag_old, line);
-		if (line.empty()) continue;
-		std::istringstream tmp(line);
-		tmp>>px>>py>>mag;
-		sq.add_star(px,py,mag,0);	}
-
-	std::ifstream xy_mag_new(argv[2]);
-	while (!xy_mag_new.eof()) {
-		std::getline(xy_mag_new, line);
-		if (line.empty()) continue;
-		std::istringstream tmp(line);
-		tmp>>px>>py>>mag;
-		sq.add_star(px,py,mag,1);
-	}
-	double p_match = sq.search_rel();
-	std::cout<<"Best score: "<<sq.c_scores[0].totalscore<<std::endl;
-	std::cout << "P match: " << p_match <<std::endl;
-	for (int n=0;n<sq.winner_id_map.size();n++){
-		std::cout << "Old id: " << sq.winner_id_map[n];
-		std::cout << " New id: " << n;
-		std::cout << " Score: " << sq.winner_scores[n] <<std::endl;
+	
+	std::ifstream xy_mag;
+	for (int i=1;i<argc;i++){
+		sq.flip();
+		xy_mag.open(argv[i]);
+		while (!xy_mag.eof()) {
+			std::getline(xy_mag, line);
+			if (line.empty()) continue;
+			std::istringstream tmp(line);
+			tmp>>px>>py>>mag;
+			sq.add_star(px,py,mag);	
+		}
+		xy_mag.close();
+		double p_match = sq.search_rel();
+		std::cout<<"New image: "<<argv[i]<<std::endl;
+		if (sq.c_scores.size()>0) {
+			std::cout<<"Best score: "<<sq.c_scores[0].totalscore<<std::endl;
+		}
+		std::cout << "P match: " << p_match <<std::endl;
+		for (int n=0;n<sq.winner_id_map.size();n++){
+			std::cout << "Old id: " << sq.winner_id_map[n];
+			std::cout << " New id: " << n;
+			std::cout << " Score: " << sq.winner_scores[n] <<std::endl;
+		}
 	}
 }

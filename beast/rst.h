@@ -24,10 +24,10 @@ namespace rst
 	
 	struct  constellation_score {
 		double totalscore;
-		unsigned char old_s1;
-		unsigned char old_s2;
-		unsigned char new_s1;
-		unsigned char new_s2;
+		unsigned char oldid1;
+		unsigned char oldid2;
+		unsigned char newid1;
+		unsigned char newid2;
 		//id=new
 		//value=old
 		std::vector<int> id_map;
@@ -42,7 +42,6 @@ namespace rst
 	
 	extern bool compare_mag (const star &s1, const star &s2);
 	extern bool compare_totalscore (const constellation_score &cs1, const constellation_score &cs2);
-	extern bool compare_starnum (const star &s1, const star &s2);
 	
 	class star_query {
 	public:
@@ -63,13 +62,13 @@ namespace rst
 		
 		unsigned char *img_mask;
 		struct constellation *starptr;
-		void add_star(double px, double py, double mag, int newstar);
+		void add_star(double px, double py, double mag);
+		void flip();
 		double dist3(double x1,double x2,double y1,double y2,double z1,double z2);
-		void sort_mag();
-		void sort_starnum();
 		void add_entry(int mapidx,int curr_const);
-		
+		void set_mask(int x, int y, int id, double score);
 		double search_rel();
-		constellation_score weighted_triad(unsigned char old_s1,unsigned char old_s2,unsigned char new_s1,unsigned char new_s2);
+		void weighted_triad(star &old_s1,star &old_s2,star &new_s1,star &new_s2);
+		constellation_score score_rel(unsigned char oldid1,unsigned char oldid2,unsigned char newid1,unsigned char newid2);
 	};
 }

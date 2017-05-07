@@ -13,9 +13,6 @@ echo "PROB_FALSE_STAR=0.5" >> calibration/calibration.txt
 #50 percent of stars fall within 1 sigma. This should probably be at least 2
 echo "MAG_BOUND_SIGMA=2" >> calibration/calibration.txt
 
-#if sky coverage is marginal, and fov is not square, set this to one
-echo "ALL_THESE_SQUARES_MAKE_A_CIRCLE=0" >> calibration/calibration.txt
-
 #this also copies the image for use by astrometry
 python image_stats.py >> calibration/calibration.txt
 cd calibration

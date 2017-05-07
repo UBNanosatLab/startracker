@@ -13,13 +13,10 @@ import config
 execfile(config.PROJECT_ROOT+"catalog_gen/calibration/calibration.txt")
 
 def getfovradius():
-	if ALL_THESE_SQUARES_MAKE_A_CIRCLE==0:
-		if DEG_X<DEG_Y:
-			return DEG_X/2.0
-		else:
-			return DEG_Y/2.0
+	if DEG_X<DEG_Y:
+		return DEG_X/2.0
 	else:
-		return math.sqrt(DEG_X*DEG_Y)/2
+		return DEG_Y/2.0
 
 def rotation_matrix(axis, theta):
     """
