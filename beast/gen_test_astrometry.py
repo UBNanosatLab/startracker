@@ -33,6 +33,7 @@ def cal_xy_flux():
 image_stars_info = [[i[0],i[1],i[2]] for i in cal_xy_flux()]
 sq=identify_stars(image_stars_info)
 if (len(sq)>0):
-	A=np.array([[i[2],i[3],i[4]] for i in sq])
-	B=np.array([[i[5],i[6],i[7]] for i in sq])
+	A=np.array([[i[0],i[1],i[2]] for i in sq])
+	B=np.array([[i[3],i[4],i[5]] for i in sq])
+	weights=np.array([i[6] for i in sq])
 	R=rigid_transform_3D(A,B)

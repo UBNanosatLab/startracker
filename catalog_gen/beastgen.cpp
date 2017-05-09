@@ -10,19 +10,25 @@
 #include "configuration.h"
 
 
-//using namespace std;
 struct constellation {
-	int s[4];
-	double p[6];
+	double p;
+	int s1;
+	int s2;
+	int numstars;
+	int staridx;
 	int last;
+	//pad to a multiple of 8 for 32/64 bit compatability
+	int pad;
 };
-int *map;
-struct constellation *starptr;
 
-void add_entry(int mapidx,int curr_const) {
+int *map;
+struct constellation *constptr;
+int *star_ids;
+
+void  add_entry(int mapidx,int curr_const) {
 	int *staridx;
-	for (staridx=&map[mapidx];*staridx!=-1;staridx=&(starptr[*staridx].last));
-	if (staridx!=&(starptr[curr_const].last)) *staridx=curr_const;
+	for (staridx=&map[mapidx];*staridx!=-1;staridx=&(constptr[*staridx].last));
+	if (staridx!=&(constptr[curr_const].last)) *staridx=curr_const;
 }
 
 int main (int argc, char** argv) {
@@ -38,20 +44,15 @@ int main (int argc, char** argv) {
 	cfgfile2 >> config2;
 	cfgfile2.close();
 	
-	std::ifstream starline("calibration/constellations.txt");
+	std::ifstream constline("calibration/constellations.txt");
 	
-	int PARAM1=atoi(config1["PARAM1"].c_str());
-	int PARAM2=atoi(config1["PARAM2"].c_str());
-	int PARAM3=atoi(config1["PARAM3"].c_str());
+	int PARAM=atoi(config1["PARAM"].c_str());
 	int NUMCONST=atoi(config1["NUMCONST"].c_str());
+	int STARTABLE=atoi(config1["STARTABLE"].c_str());
 	double ARC_ERR=atof(config2["ARC_ERR"].c_str());
-
-	int i1_max=PARAM1/2;
-	int i2_max=PARAM2/2;
-	int i3_max=PARAM3/2;
-
-	size_t mapsize = i1_max*i2_max*i3_max;
-	size_t dbsize = mapsize*sizeof(int) + NUMCONST*sizeof(struct constellation);
+	int mapsize=PARAM;
+	int s_offset=mapsize*sizeof(int)+ NUMCONST*sizeof(struct constellation);
+	size_t dbsize = s_offset + STARTABLE*sizeof(int);
 	
 	/* Open a file for writing.
 	 *  - Creating the file if it doesn't exist.
@@ -81,8 +82,6 @@ int main (int argc, char** argv) {
 		perror("Error writing last byte of the file");
 		exit(EXIT_FAILURE);
 	}
-	
-
 	// Now the file is ready to be mmapped.
 
 	map = (int*)mmap(0, dbsize, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
@@ -92,55 +91,32 @@ int main (int argc, char** argv) {
 		perror("Error mmapping the file");
 		exit(EXIT_FAILURE);
 	}
-	starptr=(struct constellation*)(&map[mapsize]);
+	constptr=(struct constellation*)(&map[mapsize]);
+	star_ids=(int*)(&map[s_offset/sizeof(int)]);
 	memset(map, -1, dbsize);
+	int mmi_l,mmi_m,mmi_h;
+	int curr_star=0;
 	for (int curr_const=0;curr_const<NUMCONST;curr_const++){
-		for (int i=0;i<6;i++) starline>>starptr[curr_const].p[i];
-		for (int i=0;i<4;i++) starline>>starptr[curr_const].s[i];
-		int i1=(int)(starptr[curr_const].p[0]/ARC_ERR+.5)%PARAM1;
-		int i2=(int)(starptr[curr_const].p[1]/ARC_ERR+.5)%PARAM2;
-		int i3=(int)(starptr[curr_const].p[2]/ARC_ERR+.5)%PARAM3;
-		i1=i1/2+(i1&1);
-		i2=i2/2+(i2&1);
-		i3=i3/2+(i3&1);
-
-		int i1_l=((i1-1)%i1_max);
-		int i1_u=((i1)%i1_max);
-		if (i1_l<0) i1_l+=i1_max;
-		if (i1_u<0) i1_u+=i1_max;
-		i1_l*=i2_max*i3_max;
-		i1_u*=i2_max*i3_max;
+		constline>>constptr[curr_const].p;
+		constline>>constptr[curr_const].s1;
+		constline>>constptr[curr_const].s2;
+		constline>>constptr[curr_const].numstars;
+		constptr[curr_const].staridx=curr_star;
+		for (int i=0;i<constptr[curr_const].numstars;i++) {
+			constline>>star_ids[curr_star];
+			curr_star++;
+		}
+		//add entry to constellation table
+		mmi_l=(int)(constptr[curr_const].p/ARC_ERR-1)%mapsize;
+		mmi_m=(int)(constptr[curr_const].p/ARC_ERR)%mapsize;
+		mmi_h=(int)(constptr[curr_const].p/ARC_ERR+1)%mapsize;
+		if (mmi_l<0) mmi_l+=mapsize;
+		if (mmi_m<0) mmi_m+=mapsize;
+		if (mmi_h<0) mmi_h+=mapsize;
 		
-		int i2_l=((i2-1)%i2_max);
-		int i2_u=((i2)%i2_max);
-		if (i2_l<0) i2_l+=i2_max;
-		if (i2_u<0) i2_u+=i2_max;
-		i2_l*=i3_max;
-		i2_u*=i3_max;
-		
-		int i3_l=((i3-1)%i3_max);
-		int i3_u=((i3)%i3_max);
-		if (i3_l<0) i3_l+=i3_max;
-		if (i3_u<0) i3_u+=i3_max;
-		
-		//std::cout<<i1_l/(i2_max*i3_max)<<" "<<i2_l/(i3_max)<<" "<<i3_l<<std::endl<<std::flush;
-		//std::cout<<i1_u/(i2_max*i3_max)<<" "<<i2_l/(i3_max)<<" "<<i3_l<<std::endl<<std::flush;
-		//std::cout<<i1_l/(i2_max*i3_max)<<" "<<i2_u/(i3_max)<<" "<<i3_l<<std::endl<<std::flush;
-		//std::cout<<i1_u/(i2_max*i3_max)<<" "<<i2_u/(i3_max)<<" "<<i3_l<<std::endl<<std::flush;
-		//std::cout<<i1_l/(i2_max*i3_max)<<" "<<i2_l/(i3_max)<<" "<<i3_u<<std::endl<<std::flush;
-		//std::cout<<i1_u/(i2_max*i3_max)<<" "<<i2_l/(i3_max)<<" "<<i3_u<<std::endl<<std::flush;
-		//std::cout<<i1_l/(i2_max*i3_max)<<" "<<i2_u/(i3_max)<<" "<<i3_u<<std::endl<<std::flush;
-		//std::cout<<i1_u/(i2_max*i3_max)<<" "<<i2_u/(i3_max)<<" "<<i3_u<<std::endl<<std::flush;
-		//std::cout<<"--"<<std::endl<<std::flush;
-		
-		add_entry(i1_l+i2_l+i3_l,curr_const);
-		add_entry(i1_u+i2_l+i3_l,curr_const);
-		add_entry(i1_l+i2_u+i3_l,curr_const);
-		add_entry(i1_u+i2_u+i3_l,curr_const);
-		add_entry(i1_l+i2_l+i3_u,curr_const);
-		add_entry(i1_u+i2_l+i3_u,curr_const);
-		add_entry(i1_l+i2_u+i3_u,curr_const);
-		add_entry(i1_u+i2_u+i3_u,curr_const);
+		add_entry(mmi_l,curr_const);
+		add_entry(mmi_m,curr_const);
+		add_entry(mmi_h,curr_const);
 	}
 	
 	// Write it now to disk
@@ -156,6 +132,6 @@ int main (int argc, char** argv) {
 	}
 	// Un-mmaping doesn't close the file, so we still need to do that.
 	close(fd);
-	
+	constline.close();
 }
 

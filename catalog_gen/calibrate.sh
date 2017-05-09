@@ -3,8 +3,6 @@
 echo "POS_ERR_SIGMA=1.8" > calibration/calibration.txt
 echo "IMAGE_MAX=255" >> calibration/calibration.txt
 echo "PSF_RADIUS=3.5" >> calibration/calibration.txt
-#Use MIN_MAG=None with real startracker
-echo "MIN_MAG=4.6" >> calibration/calibration.txt
 echo "MAX_FALSE_STARS=7" >> calibration/calibration.txt
 
 #Set threshold so that there is a 50% chance of a star apearing above the threshold per image

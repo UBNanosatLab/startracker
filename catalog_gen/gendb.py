@@ -12,11 +12,14 @@ import config
 
 execfile(config.PROJECT_ROOT+"catalog_gen/calibration/calibration.txt")
 
-def getfovradius():
+def minfovradius():
 	if DEG_X<DEG_Y:
 		return DEG_X/2.0
 	else:
 		return DEG_Y/2.0
+
+def maxfovradius():
+	return math.sqrt(DEG_X**2+DEG_Y**2)
 
 def rotation_matrix(axis, theta):
     """
@@ -33,13 +36,6 @@ def rotation_matrix(axis, theta):
                      [2*(bc-ad), aa+cc-bb-dd, 2*(cd+ab)],
                      [2*(bd+ac), 2*(cd-ab), aa+dd-bb-cc]])
 
-#xyz_dist takes xyz of two points
-#returns distance in degrees
-def xyz_dist(xyz1,xyz2):
-	return math.degrees(math.asin(np.linalg.norm(np.cross(xyz1,xyz2))))
-#star_dist takes ids of two stars,returns distance between them in arcseconds
-def star_dist(s1,s2):
-	return 3600*xyz_dist(stardb[s1][4:7],stardb[s2][4:7])
 
 #load our star catalog, converting from id,ra,dec to x,y,z,id
 def getstardb(filename=config.PROJECT_ROOT+"catalog_gen/catalog.dat"):
@@ -62,13 +58,12 @@ def getstardb(filename=config.PROJECT_ROOT+"catalog_gen/catalog.dat"):
 
 stardb=getstardb()
 
-
 #generate a list of coordinates which covers the sky completely
 #with the constraint that the space between each point may be no more than fov/2
 #the idea is we are simulating the process of pointing our camera at every possible region of sky
 def getglobe():
 	globe=[]
-	step=getfovradius()/math.sqrt(2)
+	step=minfovradius()/math.sqrt(2)
 	decstep=180/math.floor(180/step)
 	for dec in list(np.arange(-90+decstep/2,90,decstep)):
 		rastep=360/math.floor(360/(step/math.cos(math.radians(dec))))
@@ -79,38 +74,38 @@ def getglobe():
 			globe.append([x,y,z])
 	return np.array(globe)
 
+
+def checkcoverage(starlist):
+	global ARC_ERR
+	global stardb
+	sd=np.array(stardb.values(),dtype=object)
+	err=ARC_ERR*2./3600.
+	xyz=np.array(sd[starlist,4:7].tolist(),dtype=float)
+	fovxyz=getglobe()
+	result=searchxyz(xyz,fovxyz,minfovradius())
+	numgood=0
+	for i in range(0,len(fovxyz)):
+		if len(result[i])>1:
+			numgood+=1
+	print >>sys.stderr,"Database coverage: "+str(100.0*numgood/len(fovxyz)) + "% percent of the sky"
+
 #radius is in degrees
 def searchxyz(starxyz,points,radius=None):
 	if (radius==None):
-		radius=getfovradius()
+		radius=minfovradius()
 	xyz = spatial.cKDTree(starxyz)
 	pts = spatial.cKDTree(points)
 	return pts.query_ball_tree(xyz,2*abs(math.sin(math.radians(radius)/2)))
 
 
-def mag2val(mag):
-	return MAG2VAL_M*10**(mag/-2.5)+MAG2VAL_B
-def mag2min(mag):
-	return mag2val(mag)+MAG2VAL_BELOW*MAG_BOUND_SIGMA
-def mag2max(mag):
-	return mag2val(mag)+MAG2VAL_ABOVE*MAG_BOUND_SIGMA
-
-#why BRIGHT_THRESH*2?
-#since the brightness threshold of the image centroiding program is BRIGHT_THRESH
-#we need to add an extra BRIGHT_THRESH to make sure star brightnesses never drops below that amount
-def filterbrightness():
+def filterbrightness(mag=None):
 	global stardb
+	if (mag==None):
+		mag=MIN_MAG
 	sd=np.array(stardb.values(),dtype = object)
-	#estimate min mag from reference image
-	minbright=BRIGHT_THRESH*2
-	if(MIN_MAG!=None):
-		for i in sd:
-			if i[1]>MIN_MAG:
-				del stardb[i[0]]
-	else:	
-		for i in sd:
-			if mag2min(i[8])<minbright:
-				del stardb[i[0]]
+	for i in sd:
+		if i[1]>mag:
+			del stardb[i[0]]
 
 def filterunreliable():
 	global stardb
@@ -131,103 +126,78 @@ def filterdoublestars(r=None):
 			if k in stardb:
 				del stardb[k]
 
-def nearstars():
-	global ARC_ERR
-	global stardb
-	sd=np.array(stardb.values(),dtype = object)
-	err=ARC_ERR*2./3600.
-	xyz=np.array(sd[:,4:7].tolist(),dtype=float)
-	result=searchxyz(xyz,xyz,getfovradius())
-	starlist=[]
-	for i in range(0,len(xyz)):
-		if len(result[i])>3:
-			dist=np.degrees(np.arccos(np.clip(np.sum(xyz[i]*xyz[result[i]],1),a_min=-1,a_max=1)))
-			maxsize=heapq.nsmallest(4,dist)[-1]+err
-			starlist.append([sd[result[i][j]][0] for j in range(0,len(dist)) if dist[j]<maxsize])
-	return starlist
-
-def fovstars():
-	global ARC_ERR
-	global stardb
-	sd=np.array(stardb.values(),dtype=object)
-	err=ARC_ERR*2./3600.
-	xyz=np.array(sd[:,4:7].tolist(),dtype=float)
-	fovxyz=getglobe()
-	result=searchxyz(xyz,fovxyz,getfovradius())
-	starlist=[]
-	numgood=0
-	for i in range(0,len(fovxyz)):
-		if len(result[i])>3:
-			numgood+=1
-			dist=np.degrees(np.arccos(np.clip(np.sum(fovxyz[i]*xyz[result[i]],1),a_min=-1,a_max=1)))
-			minidx=np.argmin(dist)
-			dist=np.degrees(np.arccos(np.clip(np.sum(xyz[result[i][minidx]]*xyz[result[i]],1),a_min=-1,a_max=1)))
-			maxsize=heapq.nsmallest(4,dist)[-1]+err
-			starlist.append([int(sd[result[i][j]][0]) for j in range(0,len(dist)) if dist[j]<maxsize])
-	print >>sys.stderr,"Database coverage: "+str(100.0*numgood/len(fovxyz)) + "% percent of the sky"
-	return starlist
-
-#this function takes in a sorted list, a key function and an error, and returns
-#an iterator to every posible permutation of the list which is sorted to within +/- err
-#example: sorted_perms(sorted([3,2,1],key=vp),vp,1):
-#based on http://code.activestate.com/recipes/252178/
-
-def star_permutations(stars,key_min=lambda x: x,key_max=lambda x: x):
-	assert(len(stars)>3)
-	def sp(sl):
-		if len(sl) <=1:
-			yield sl
-		else:
-			for perm in sp(sl[1:]):
-				yield sl[0:1] + perm[:]
-				for i in range(1,len(perm)+1):
-					if key_min(perm[i-1])<=key_max(sl[0]):
-						yield perm[:i] + sl[0:1] + perm[i:]
-					else:
-						break
-	return [[i[0],i[1],i[2],i[3]] for i in sp(sorted(stars,key=key_min))]
-
-
-
 def sort_uniq(sequence):
     return [i for i in itertools.imap(operator.itemgetter(0),itertools.groupby(sorted(sequence)))]
 
-def transpose_distance(oldstars):
-	global ARC_ERR
+#return a set of brightest stars with average density nstars per field of view
+def uniformstarlist(nstars=4):
 	global stardb
-	err=ARC_ERR*2.
-	newstars=[]
-	for stars in oldstars:
-		dist={}
-		for i in stars:
-			dist[i]=star_dist(stars[0],i)
-		newstars+=star_permutations(stars,lambda s: dist[s],lambda s: dist[s]+err)
-	return newstars
+	sd=np.array(stardb.values(),dtype = object)
+	xyz=np.array(sd[:,4:7].tolist(),dtype=float)
+	starlist=[]
+	for i in searchxyz(xyz,xyz):
+		starlist+=heapq.nsmallest(nstars,i,key=lambda j: sd[j][1])
+	return sort_uniq(starlist)
 
-def transpose_brightness(oldstars):
-	global stardb
-	err=BRIGHT_THRESH
-	newstars=[]
-	clipmax=lambda s: s if s<IMAGE_MAX else IMAGE_MAX
-	if(MIN_MAG!=None):
-		for stars in oldstars:
-			newstars+=star_permutations(stars,lambda s: -clipmax(mag2max(stardb[s][1])+err),lambda s: -clipmax(mag2min(stardb[s][1])))
-	else:
-		for stars in oldstars:
-			newstars+=star_permutations(stars,lambda s: -clipmax(mag2max(stardb[s][7])+err),lambda s: -clipmax(mag2min(stardb[s][8])))
-	return newstars
-
-def print_constellations(starlist):
-	for s in starlist:
-		print star_dist(s[0],s[1]),star_dist(s[0],s[2]),star_dist(s[0],s[3]),star_dist(s[1],s[2]),star_dist(s[1],s[3]),star_dist(s[2],s[3]),s[0],s[1],s[2],s[3]
+#xyz_dist takes xyz of two points
+#returns distance in degrees
+def xyz_dist(xyz1,xyz2):
+	return math.degrees(math.asin(np.linalg.norm(np.cross(xyz1,xyz2))))
 
 #only do this part if we were run as a python script
 if __name__ == '__main__':
-	filterunreliable()
 	filterbrightness()
 	filterdoublestars()
-	starlist=sort_uniq(fovstars()+nearstars())
-	#starlist=sort_uniq(fovstars())
-	starlist=sort_uniq(transpose_distance(starlist))
-	starlist=sort_uniq(transpose_brightness(starlist))
-	print_constellations(starlist)
+	filterunreliable()
+
+	#print stars
+	if (len(sys.argv)>1):
+		f= open(sys.argv[1], 'w')
+	else:
+		f= open("/dev/stdout", 'w')
+	for i in stardb.values():
+		print >>f, i[0],i[1],i[4],i[5],i[6]
+	f.close()
+
+	starlist=uniformstarlist()
+	#print info to the user about sky coverage
+	checkcoverage(starlist)
+
+	#print constellations
+	if (len(sys.argv)>2):
+		f= open(sys.argv[2], 'w')
+	else:
+		f= open("/dev/stdout", 'w')
+
+	sd=np.array(stardb.values(),dtype = object)
+	sd[:,0]=np.array(range(0,len(sd)))
+	uni_sd=sd[starlist]
+	xyz=np.array(sd[:,4:7].tolist(),dtype=float)
+	uni_xyz=np.array(uni_sd[:,4:7].tolist(),dtype=float)
+	#for each star in the uniform starlist, get all nearby stars in the database
+	ns=searchxyz(xyz,uni_xyz,maxfovradius()/2)
+	#get nearby stars uniform star database
+	uni_ns=searchxyz(uni_xyz,uni_xyz,maxfovradius()/2)
+	
+	STARTABLE=0
+	NUMCONST=0
+	NUMSTARS=len(sd)
+	for i in range(0,len(uni_ns)):
+		for j in uni_ns[i]:
+			if (j>i):
+				temp=list(set(ns[i])&set(ns[j]))
+				print >>f, 3600*xyz_dist(uni_xyz[i],uni_xyz[j]),uni_sd[i,0],uni_sd[j,0],len(temp)
+				print >>f, " ".join([str(s) for s in temp])
+				STARTABLE+=len(temp)
+				NUMCONST+=1
+	f.close()
+	#print db info
+	if (len(sys.argv)>3):
+		f= open(sys.argv[3], 'w')
+	else:
+		f= open("/dev/stdout", 'w')
+	print >>f, "STARTABLE="+str(STARTABLE)
+	print >>f, "NUMCONST="+str(NUMCONST)
+	print >>f, "NUMSTARS="+str(NUMSTARS)
+	print >>f, "PARAM="+str(int(2+3600*maxfovradius()/(2*ARC_ERR)))
+	

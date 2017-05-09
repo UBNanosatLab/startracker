@@ -96,10 +96,14 @@ class constellation(_object):
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, constellation, name)
     __repr__ = _swig_repr
-    __swig_setmethods__["s"] = _beast.constellation_s_set
-    __swig_getmethods__["s"] = _beast.constellation_s_get
+    __swig_setmethods__["s1"] = _beast.constellation_s1_set
+    __swig_getmethods__["s1"] = _beast.constellation_s1_get
     if _newclass:
-        s = _swig_property(_beast.constellation_s_get, _beast.constellation_s_set)
+        s1 = _swig_property(_beast.constellation_s1_get, _beast.constellation_s1_set)
+    __swig_setmethods__["s2"] = _beast.constellation_s2_set
+    __swig_getmethods__["s2"] = _beast.constellation_s2_get
+    if _newclass:
+        s2 = _swig_property(_beast.constellation_s2_get, _beast.constellation_s2_set)
     __swig_setmethods__["p"] = _beast.constellation_p_set
     __swig_getmethods__["p"] = _beast.constellation_p_get
     if _newclass:
@@ -150,10 +154,22 @@ class star(_object):
     __swig_getmethods__["magnum"] = _beast.star_magnum_get
     if _newclass:
         magnum = _swig_property(_beast.star_magnum_get, _beast.star_magnum_set)
-    __swig_setmethods__["hipid"] = _beast.star_hipid_set
-    __swig_getmethods__["hipid"] = _beast.star_hipid_get
+    __swig_setmethods__["id"] = _beast.star_id_set
+    __swig_getmethods__["id"] = _beast.star_id_get
     if _newclass:
-        hipid = _swig_property(_beast.star_hipid_get, _beast.star_hipid_set)
+        id = _swig_property(_beast.star_id_get, _beast.star_id_set)
+    __swig_setmethods__["sigma_sq"] = _beast.star_sigma_sq_set
+    __swig_getmethods__["sigma_sq"] = _beast.star_sigma_sq_get
+    if _newclass:
+        sigma_sq = _swig_property(_beast.star_sigma_sq_get, _beast.star_sigma_sq_set)
+    __swig_setmethods__["px"] = _beast.star_px_set
+    __swig_getmethods__["px"] = _beast.star_px_get
+    if _newclass:
+        px = _swig_property(_beast.star_px_get, _beast.star_px_set)
+    __swig_setmethods__["py"] = _beast.star_py_set
+    __swig_getmethods__["py"] = _beast.star_py_get
+    if _newclass:
+        py = _swig_property(_beast.star_py_get, _beast.star_py_set)
 
     def __init__(self):
         this = _beast.new_star()
@@ -166,86 +182,200 @@ class star(_object):
 star_swigregister = _beast.star_swigregister
 star_swigregister(star)
 
+class constellation_score(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, constellation_score, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, constellation_score, name)
+    __repr__ = _swig_repr
+    __swig_setmethods__["totalscore"] = _beast.constellation_score_totalscore_set
+    __swig_getmethods__["totalscore"] = _beast.constellation_score_totalscore_get
+    if _newclass:
+        totalscore = _swig_property(_beast.constellation_score_totalscore_get, _beast.constellation_score_totalscore_set)
+    __swig_setmethods__["oldid1"] = _beast.constellation_score_oldid1_set
+    __swig_getmethods__["oldid1"] = _beast.constellation_score_oldid1_get
+    if _newclass:
+        oldid1 = _swig_property(_beast.constellation_score_oldid1_get, _beast.constellation_score_oldid1_set)
+    __swig_setmethods__["oldid2"] = _beast.constellation_score_oldid2_set
+    __swig_getmethods__["oldid2"] = _beast.constellation_score_oldid2_get
+    if _newclass:
+        oldid2 = _swig_property(_beast.constellation_score_oldid2_get, _beast.constellation_score_oldid2_set)
+    __swig_setmethods__["newid1"] = _beast.constellation_score_newid1_set
+    __swig_getmethods__["newid1"] = _beast.constellation_score_newid1_get
+    if _newclass:
+        newid1 = _swig_property(_beast.constellation_score_newid1_get, _beast.constellation_score_newid1_set)
+    __swig_setmethods__["newid2"] = _beast.constellation_score_newid2_set
+    __swig_getmethods__["newid2"] = _beast.constellation_score_newid2_get
+    if _newclass:
+        newid2 = _swig_property(_beast.constellation_score_newid2_get, _beast.constellation_score_newid2_set)
+    __swig_setmethods__["id_map"] = _beast.constellation_score_id_map_set
+    __swig_getmethods__["id_map"] = _beast.constellation_score_id_map_get
+    if _newclass:
+        id_map = _swig_property(_beast.constellation_score_id_map_get, _beast.constellation_score_id_map_set)
+    __swig_setmethods__["scores"] = _beast.constellation_score_scores_set
+    __swig_getmethods__["scores"] = _beast.constellation_score_scores_get
+    if _newclass:
+        scores = _swig_property(_beast.constellation_score_scores_get, _beast.constellation_score_scores_set)
+
+    def __init__(self):
+        this = _beast.new_constellation_score()
+        try:
+            self.this.append(this)
+        except Exception:
+            self.this = this
+    __swig_destroy__ = _beast.delete_constellation_score
+    __del__ = lambda self: None
+constellation_score_swigregister = _beast.constellation_score_swigregister
+constellation_score_swigregister(constellation_score)
+
 
 def load_db():
     return _beast.load_db()
 load_db = _beast.load_db
 
-def close_db():
-    return _beast.close_db()
-close_db = _beast.close_db
+def unload_db():
+    return _beast.unload_db()
+unload_db = _beast.unload_db
 
 def compare_mag(s1, s2):
     return _beast.compare_mag(s1, s2)
 compare_mag = _beast.compare_mag
 
-def compare_starnum(s1, s2):
-    return _beast.compare_starnum(s1, s2)
-compare_starnum = _beast.compare_starnum
+def compare_totalscore(cs1, cs2):
+    return _beast.compare_totalscore(cs1, cs2)
+compare_totalscore = _beast.compare_totalscore
 class star_query(_object):
     __swig_setmethods__ = {}
     __setattr__ = lambda self, name, value: _swig_setattr(self, star_query, name, value)
     __swig_getmethods__ = {}
     __getattr__ = lambda self, name: _swig_getattr(self, star_query, name)
     __repr__ = _swig_repr
-    __swig_setmethods__["stars"] = _beast.star_query_stars_set
-    __swig_getmethods__["stars"] = _beast.star_query_stars_get
+    __swig_setmethods__["oldstars"] = _beast.star_query_oldstars_set
+    __swig_getmethods__["oldstars"] = _beast.star_query_oldstars_get
     if _newclass:
-        stars = _swig_property(_beast.star_query_stars_get, _beast.star_query_stars_set)
-    __swig_setmethods__["pilot"] = _beast.star_query_pilot_set
-    __swig_getmethods__["pilot"] = _beast.star_query_pilot_get
+        oldstars = _swig_property(_beast.star_query_oldstars_get, _beast.star_query_oldstars_set)
+    __swig_setmethods__["newstars"] = _beast.star_query_newstars_set
+    __swig_getmethods__["newstars"] = _beast.star_query_newstars_get
     if _newclass:
-        pilot = _swig_property(_beast.star_query_pilot_get, _beast.star_query_pilot_set)
-    __swig_setmethods__["im_0"] = _beast.star_query_im_0_set
-    __swig_getmethods__["im_0"] = _beast.star_query_im_0_get
+        newstars = _swig_property(_beast.star_query_newstars_get, _beast.star_query_newstars_set)
+    __swig_setmethods__["c_scores"] = _beast.star_query_c_scores_set
+    __swig_getmethods__["c_scores"] = _beast.star_query_c_scores_get
     if _newclass:
-        im_0 = _swig_property(_beast.star_query_im_0_get, _beast.star_query_im_0_set)
-    __swig_setmethods__["im_1"] = _beast.star_query_im_1_set
-    __swig_getmethods__["im_1"] = _beast.star_query_im_1_get
+        c_scores = _swig_property(_beast.star_query_c_scores_get, _beast.star_query_c_scores_set)
+    __swig_setmethods__["winner_scores"] = _beast.star_query_winner_scores_set
+    __swig_getmethods__["winner_scores"] = _beast.star_query_winner_scores_get
     if _newclass:
-        im_1 = _swig_property(_beast.star_query_im_1_get, _beast.star_query_im_1_set)
-    __swig_setmethods__["im_2"] = _beast.star_query_im_2_set
-    __swig_getmethods__["im_2"] = _beast.star_query_im_2_get
+        winner_scores = _swig_property(_beast.star_query_winner_scores_get, _beast.star_query_winner_scores_set)
+    __swig_setmethods__["winner_id_map"] = _beast.star_query_winner_id_map_set
+    __swig_getmethods__["winner_id_map"] = _beast.star_query_winner_id_map_get
     if _newclass:
-        im_2 = _swig_property(_beast.star_query_im_2_get, _beast.star_query_im_2_set)
-    __swig_setmethods__["im_3"] = _beast.star_query_im_3_set
-    __swig_getmethods__["im_3"] = _beast.star_query_im_3_get
+        winner_id_map = _swig_property(_beast.star_query_winner_id_map_get, _beast.star_query_winner_id_map_set)
+    __swig_setmethods__["numoldstars"] = _beast.star_query_numoldstars_set
+    __swig_getmethods__["numoldstars"] = _beast.star_query_numoldstars_get
     if _newclass:
-        im_3 = _swig_property(_beast.star_query_im_3_get, _beast.star_query_im_3_set)
-    __swig_setmethods__["db_0"] = _beast.star_query_db_0_set
-    __swig_getmethods__["db_0"] = _beast.star_query_db_0_get
+        numoldstars = _swig_property(_beast.star_query_numoldstars_get, _beast.star_query_numoldstars_set)
+    __swig_setmethods__["numnewstars"] = _beast.star_query_numnewstars_set
+    __swig_getmethods__["numnewstars"] = _beast.star_query_numnewstars_get
     if _newclass:
-        db_0 = _swig_property(_beast.star_query_db_0_get, _beast.star_query_db_0_set)
-    __swig_setmethods__["db_1"] = _beast.star_query_db_1_set
-    __swig_getmethods__["db_1"] = _beast.star_query_db_1_get
+        numnewstars = _swig_property(_beast.star_query_numnewstars_get, _beast.star_query_numnewstars_set)
+    __swig_setmethods__["addedoldstars"] = _beast.star_query_addedoldstars_set
+    __swig_getmethods__["addedoldstars"] = _beast.star_query_addedoldstars_get
     if _newclass:
-        db_1 = _swig_property(_beast.star_query_db_1_get, _beast.star_query_db_1_set)
-    __swig_setmethods__["db_2"] = _beast.star_query_db_2_set
-    __swig_getmethods__["db_2"] = _beast.star_query_db_2_get
+        addedoldstars = _swig_property(_beast.star_query_addedoldstars_get, _beast.star_query_addedoldstars_set)
+    __swig_setmethods__["addednewstars"] = _beast.star_query_addednewstars_set
+    __swig_getmethods__["addednewstars"] = _beast.star_query_addednewstars_get
     if _newclass:
-        db_2 = _swig_property(_beast.star_query_db_2_get, _beast.star_query_db_2_set)
-    __swig_setmethods__["db_3"] = _beast.star_query_db_3_set
-    __swig_getmethods__["db_3"] = _beast.star_query_db_3_get
+        addednewstars = _swig_property(_beast.star_query_addednewstars_get, _beast.star_query_addednewstars_set)
+    __swig_setmethods__["numconst_rel"] = _beast.star_query_numconst_rel_set
+    __swig_getmethods__["numconst_rel"] = _beast.star_query_numconst_rel_get
     if _newclass:
-        db_3 = _swig_property(_beast.star_query_db_3_get, _beast.star_query_db_3_set)
+        numconst_rel = _swig_property(_beast.star_query_numconst_rel_get, _beast.star_query_numconst_rel_set)
+    __swig_setmethods__["mapsize_rel"] = _beast.star_query_mapsize_rel_set
+    __swig_getmethods__["mapsize_rel"] = _beast.star_query_mapsize_rel_get
+    if _newclass:
+        mapsize_rel = _swig_property(_beast.star_query_mapsize_rel_get, _beast.star_query_mapsize_rel_set)
+    __swig_setmethods__["dbsize_rel"] = _beast.star_query_dbsize_rel_set
+    __swig_getmethods__["dbsize_rel"] = _beast.star_query_dbsize_rel_get
+    if _newclass:
+        dbsize_rel = _swig_property(_beast.star_query_dbsize_rel_get, _beast.star_query_dbsize_rel_set)
+    __swig_setmethods__["map_rel"] = _beast.star_query_map_rel_set
+    __swig_getmethods__["map_rel"] = _beast.star_query_map_rel_get
+    if _newclass:
+        map_rel = _swig_property(_beast.star_query_map_rel_get, _beast.star_query_map_rel_set)
+    __swig_setmethods__["img_mask"] = _beast.star_query_img_mask_set
+    __swig_getmethods__["img_mask"] = _beast.star_query_img_mask_get
+    if _newclass:
+        img_mask = _swig_property(_beast.star_query_img_mask_get, _beast.star_query_img_mask_set)
+    __swig_setmethods__["constptr_rel"] = _beast.star_query_constptr_rel_set
+    __swig_getmethods__["constptr_rel"] = _beast.star_query_constptr_rel_get
+    if _newclass:
+        constptr_rel = _swig_property(_beast.star_query_constptr_rel_get, _beast.star_query_constptr_rel_set)
+    __swig_setmethods__["R11"] = _beast.star_query_R11_set
+    __swig_getmethods__["R11"] = _beast.star_query_R11_get
+    if _newclass:
+        R11 = _swig_property(_beast.star_query_R11_get, _beast.star_query_R11_set)
+    __swig_setmethods__["R12"] = _beast.star_query_R12_set
+    __swig_getmethods__["R12"] = _beast.star_query_R12_get
+    if _newclass:
+        R12 = _swig_property(_beast.star_query_R12_get, _beast.star_query_R12_set)
+    __swig_setmethods__["R13"] = _beast.star_query_R13_set
+    __swig_getmethods__["R13"] = _beast.star_query_R13_get
+    if _newclass:
+        R13 = _swig_property(_beast.star_query_R13_get, _beast.star_query_R13_set)
+    __swig_setmethods__["R21"] = _beast.star_query_R21_set
+    __swig_getmethods__["R21"] = _beast.star_query_R21_get
+    if _newclass:
+        R21 = _swig_property(_beast.star_query_R21_get, _beast.star_query_R21_set)
+    __swig_setmethods__["R22"] = _beast.star_query_R22_set
+    __swig_getmethods__["R22"] = _beast.star_query_R22_get
+    if _newclass:
+        R22 = _swig_property(_beast.star_query_R22_get, _beast.star_query_R22_set)
+    __swig_setmethods__["R23"] = _beast.star_query_R23_set
+    __swig_getmethods__["R23"] = _beast.star_query_R23_get
+    if _newclass:
+        R23 = _swig_property(_beast.star_query_R23_get, _beast.star_query_R23_set)
+    __swig_setmethods__["R31"] = _beast.star_query_R31_set
+    __swig_getmethods__["R31"] = _beast.star_query_R31_get
+    if _newclass:
+        R31 = _swig_property(_beast.star_query_R31_get, _beast.star_query_R31_set)
+    __swig_setmethods__["R32"] = _beast.star_query_R32_set
+    __swig_getmethods__["R32"] = _beast.star_query_R32_get
+    if _newclass:
+        R32 = _swig_property(_beast.star_query_R32_get, _beast.star_query_R32_set)
+    __swig_setmethods__["R33"] = _beast.star_query_R33_set
+    __swig_getmethods__["R33"] = _beast.star_query_R33_get
+    if _newclass:
+        R33 = _swig_property(_beast.star_query_R33_get, _beast.star_query_R33_set)
 
     def add_star(self, px, py, mag):
         return _beast.star_query_add_star(self, px, py, mag)
 
-    def sort_mag(self):
-        return _beast.star_query_sort_mag(self)
+    def flip(self):
+        return _beast.star_query_flip(self)
 
-    def sort_starnum(self):
-        return _beast.star_query_sort_starnum(self)
+    def dist3(self, x1, x2, y1, y2, z1, z2):
+        return _beast.star_query_dist3(self, x1, x2, y1, y2, z1, z2)
 
-    def querydb(self, a, b, c, d):
-        return _beast.star_query_querydb(self, a, b, c, d)
+    def add_entry_rel(self, mapidx, curr_const):
+        return _beast.star_query_add_entry_rel(self, mapidx, curr_const)
 
-    def search_all(self):
-        return _beast.star_query_search_all(self)
+    def weighted_triad(self, old_s1, old_s2, new_s1, new_s2, variance):
+        return _beast.star_query_weighted_triad(self, old_s1, old_s2, new_s1, new_s2, variance)
 
-    def search_pilot(self):
-        return _beast.star_query_search_pilot(self)
+    def set_mask(self, x, y, id, score, variance):
+        return _beast.star_query_set_mask(self, x, y, id, score, variance)
+
+    def add_score(self, db_const, newid1, newid2):
+        return _beast.star_query_add_score(self, db_const, newid1, newid2)
+
+    def add_score_rel(self, oldid1, oldid2, newid1, newid2):
+        return _beast.star_query_add_score_rel(self, oldid1, oldid2, newid1, newid2)
+
+    def search(self):
+        return _beast.star_query_search(self)
+
+    def search_rel(self):
+        return _beast.star_query_search_rel(self)
 
     def __init__(self):
         this = _beast.new_star_query()
@@ -258,6 +388,409 @@ class star_query(_object):
 star_query_swigregister = _beast.star_query_swigregister
 star_query_swigregister(star_query)
 cvar = _beast.cvar
+
+class SwigPyIterator(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, SwigPyIterator, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, SwigPyIterator, name)
+
+    def __init__(self, *args, **kwargs):
+        raise AttributeError("No constructor defined - class is abstract")
+    __repr__ = _swig_repr
+    __swig_destroy__ = _beast.delete_SwigPyIterator
+    __del__ = lambda self: None
+
+    def value(self):
+        return _beast.SwigPyIterator_value(self)
+
+    def incr(self, n=1):
+        return _beast.SwigPyIterator_incr(self, n)
+
+    def decr(self, n=1):
+        return _beast.SwigPyIterator_decr(self, n)
+
+    def distance(self, x):
+        return _beast.SwigPyIterator_distance(self, x)
+
+    def equal(self, x):
+        return _beast.SwigPyIterator_equal(self, x)
+
+    def copy(self):
+        return _beast.SwigPyIterator_copy(self)
+
+    def next(self):
+        return _beast.SwigPyIterator_next(self)
+
+    def __next__(self):
+        return _beast.SwigPyIterator___next__(self)
+
+    def previous(self):
+        return _beast.SwigPyIterator_previous(self)
+
+    def advance(self, n):
+        return _beast.SwigPyIterator_advance(self, n)
+
+    def __eq__(self, x):
+        return _beast.SwigPyIterator___eq__(self, x)
+
+    def __ne__(self, x):
+        return _beast.SwigPyIterator___ne__(self, x)
+
+    def __iadd__(self, n):
+        return _beast.SwigPyIterator___iadd__(self, n)
+
+    def __isub__(self, n):
+        return _beast.SwigPyIterator___isub__(self, n)
+
+    def __add__(self, n):
+        return _beast.SwigPyIterator___add__(self, n)
+
+    def __sub__(self, *args):
+        return _beast.SwigPyIterator___sub__(self, *args)
+    def __iter__(self):
+        return self
+SwigPyIterator_swigregister = _beast.SwigPyIterator_swigregister
+SwigPyIterator_swigregister(SwigPyIterator)
+
+class VectorStars(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, VectorStars, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, VectorStars, name)
+    __repr__ = _swig_repr
+
+    def iterator(self):
+        return _beast.VectorStars_iterator(self)
+    def __iter__(self):
+        return self.iterator()
+
+    def __nonzero__(self):
+        return _beast.VectorStars___nonzero__(self)
+
+    def __bool__(self):
+        return _beast.VectorStars___bool__(self)
+
+    def __len__(self):
+        return _beast.VectorStars___len__(self)
+
+    def __getslice__(self, i, j):
+        return _beast.VectorStars___getslice__(self, i, j)
+
+    def __setslice__(self, *args):
+        return _beast.VectorStars___setslice__(self, *args)
+
+    def __delslice__(self, i, j):
+        return _beast.VectorStars___delslice__(self, i, j)
+
+    def __delitem__(self, *args):
+        return _beast.VectorStars___delitem__(self, *args)
+
+    def __getitem__(self, *args):
+        return _beast.VectorStars___getitem__(self, *args)
+
+    def __setitem__(self, *args):
+        return _beast.VectorStars___setitem__(self, *args)
+
+    def pop(self):
+        return _beast.VectorStars_pop(self)
+
+    def append(self, x):
+        return _beast.VectorStars_append(self, x)
+
+    def empty(self):
+        return _beast.VectorStars_empty(self)
+
+    def size(self):
+        return _beast.VectorStars_size(self)
+
+    def swap(self, v):
+        return _beast.VectorStars_swap(self, v)
+
+    def begin(self):
+        return _beast.VectorStars_begin(self)
+
+    def end(self):
+        return _beast.VectorStars_end(self)
+
+    def rbegin(self):
+        return _beast.VectorStars_rbegin(self)
+
+    def rend(self):
+        return _beast.VectorStars_rend(self)
+
+    def clear(self):
+        return _beast.VectorStars_clear(self)
+
+    def get_allocator(self):
+        return _beast.VectorStars_get_allocator(self)
+
+    def pop_back(self):
+        return _beast.VectorStars_pop_back(self)
+
+    def erase(self, *args):
+        return _beast.VectorStars_erase(self, *args)
+
+    def __init__(self, *args):
+        this = _beast.new_VectorStars(*args)
+        try:
+            self.this.append(this)
+        except Exception:
+            self.this = this
+
+    def push_back(self, x):
+        return _beast.VectorStars_push_back(self, x)
+
+    def front(self):
+        return _beast.VectorStars_front(self)
+
+    def back(self):
+        return _beast.VectorStars_back(self)
+
+    def assign(self, n, x):
+        return _beast.VectorStars_assign(self, n, x)
+
+    def resize(self, *args):
+        return _beast.VectorStars_resize(self, *args)
+
+    def insert(self, *args):
+        return _beast.VectorStars_insert(self, *args)
+
+    def reserve(self, n):
+        return _beast.VectorStars_reserve(self, n)
+
+    def capacity(self):
+        return _beast.VectorStars_capacity(self)
+    __swig_destroy__ = _beast.delete_VectorStars
+    __del__ = lambda self: None
+VectorStars_swigregister = _beast.VectorStars_swigregister
+VectorStars_swigregister(VectorStars)
+
+class VectorInts(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, VectorInts, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, VectorInts, name)
+    __repr__ = _swig_repr
+
+    def iterator(self):
+        return _beast.VectorInts_iterator(self)
+    def __iter__(self):
+        return self.iterator()
+
+    def __nonzero__(self):
+        return _beast.VectorInts___nonzero__(self)
+
+    def __bool__(self):
+        return _beast.VectorInts___bool__(self)
+
+    def __len__(self):
+        return _beast.VectorInts___len__(self)
+
+    def __getslice__(self, i, j):
+        return _beast.VectorInts___getslice__(self, i, j)
+
+    def __setslice__(self, *args):
+        return _beast.VectorInts___setslice__(self, *args)
+
+    def __delslice__(self, i, j):
+        return _beast.VectorInts___delslice__(self, i, j)
+
+    def __delitem__(self, *args):
+        return _beast.VectorInts___delitem__(self, *args)
+
+    def __getitem__(self, *args):
+        return _beast.VectorInts___getitem__(self, *args)
+
+    def __setitem__(self, *args):
+        return _beast.VectorInts___setitem__(self, *args)
+
+    def pop(self):
+        return _beast.VectorInts_pop(self)
+
+    def append(self, x):
+        return _beast.VectorInts_append(self, x)
+
+    def empty(self):
+        return _beast.VectorInts_empty(self)
+
+    def size(self):
+        return _beast.VectorInts_size(self)
+
+    def swap(self, v):
+        return _beast.VectorInts_swap(self, v)
+
+    def begin(self):
+        return _beast.VectorInts_begin(self)
+
+    def end(self):
+        return _beast.VectorInts_end(self)
+
+    def rbegin(self):
+        return _beast.VectorInts_rbegin(self)
+
+    def rend(self):
+        return _beast.VectorInts_rend(self)
+
+    def clear(self):
+        return _beast.VectorInts_clear(self)
+
+    def get_allocator(self):
+        return _beast.VectorInts_get_allocator(self)
+
+    def pop_back(self):
+        return _beast.VectorInts_pop_back(self)
+
+    def erase(self, *args):
+        return _beast.VectorInts_erase(self, *args)
+
+    def __init__(self, *args):
+        this = _beast.new_VectorInts(*args)
+        try:
+            self.this.append(this)
+        except Exception:
+            self.this = this
+
+    def push_back(self, x):
+        return _beast.VectorInts_push_back(self, x)
+
+    def front(self):
+        return _beast.VectorInts_front(self)
+
+    def back(self):
+        return _beast.VectorInts_back(self)
+
+    def assign(self, n, x):
+        return _beast.VectorInts_assign(self, n, x)
+
+    def resize(self, *args):
+        return _beast.VectorInts_resize(self, *args)
+
+    def insert(self, *args):
+        return _beast.VectorInts_insert(self, *args)
+
+    def reserve(self, n):
+        return _beast.VectorInts_reserve(self, n)
+
+    def capacity(self):
+        return _beast.VectorInts_capacity(self)
+    __swig_destroy__ = _beast.delete_VectorInts
+    __del__ = lambda self: None
+VectorInts_swigregister = _beast.VectorInts_swigregister
+VectorInts_swigregister(VectorInts)
+
+class VectorDoubles(_object):
+    __swig_setmethods__ = {}
+    __setattr__ = lambda self, name, value: _swig_setattr(self, VectorDoubles, name, value)
+    __swig_getmethods__ = {}
+    __getattr__ = lambda self, name: _swig_getattr(self, VectorDoubles, name)
+    __repr__ = _swig_repr
+
+    def iterator(self):
+        return _beast.VectorDoubles_iterator(self)
+    def __iter__(self):
+        return self.iterator()
+
+    def __nonzero__(self):
+        return _beast.VectorDoubles___nonzero__(self)
+
+    def __bool__(self):
+        return _beast.VectorDoubles___bool__(self)
+
+    def __len__(self):
+        return _beast.VectorDoubles___len__(self)
+
+    def __getslice__(self, i, j):
+        return _beast.VectorDoubles___getslice__(self, i, j)
+
+    def __setslice__(self, *args):
+        return _beast.VectorDoubles___setslice__(self, *args)
+
+    def __delslice__(self, i, j):
+        return _beast.VectorDoubles___delslice__(self, i, j)
+
+    def __delitem__(self, *args):
+        return _beast.VectorDoubles___delitem__(self, *args)
+
+    def __getitem__(self, *args):
+        return _beast.VectorDoubles___getitem__(self, *args)
+
+    def __setitem__(self, *args):
+        return _beast.VectorDoubles___setitem__(self, *args)
+
+    def pop(self):
+        return _beast.VectorDoubles_pop(self)
+
+    def append(self, x):
+        return _beast.VectorDoubles_append(self, x)
+
+    def empty(self):
+        return _beast.VectorDoubles_empty(self)
+
+    def size(self):
+        return _beast.VectorDoubles_size(self)
+
+    def swap(self, v):
+        return _beast.VectorDoubles_swap(self, v)
+
+    def begin(self):
+        return _beast.VectorDoubles_begin(self)
+
+    def end(self):
+        return _beast.VectorDoubles_end(self)
+
+    def rbegin(self):
+        return _beast.VectorDoubles_rbegin(self)
+
+    def rend(self):
+        return _beast.VectorDoubles_rend(self)
+
+    def clear(self):
+        return _beast.VectorDoubles_clear(self)
+
+    def get_allocator(self):
+        return _beast.VectorDoubles_get_allocator(self)
+
+    def pop_back(self):
+        return _beast.VectorDoubles_pop_back(self)
+
+    def erase(self, *args):
+        return _beast.VectorDoubles_erase(self, *args)
+
+    def __init__(self, *args):
+        this = _beast.new_VectorDoubles(*args)
+        try:
+            self.this.append(this)
+        except Exception:
+            self.this = this
+
+    def push_back(self, x):
+        return _beast.VectorDoubles_push_back(self, x)
+
+    def front(self):
+        return _beast.VectorDoubles_front(self)
+
+    def back(self):
+        return _beast.VectorDoubles_back(self)
+
+    def assign(self, n, x):
+        return _beast.VectorDoubles_assign(self, n, x)
+
+    def resize(self, *args):
+        return _beast.VectorDoubles_resize(self, *args)
+
+    def insert(self, *args):
+        return _beast.VectorDoubles_insert(self, *args)
+
+    def reserve(self, n):
+        return _beast.VectorDoubles_reserve(self, n)
+
+    def capacity(self):
+        return _beast.VectorDoubles_capacity(self)
+    __swig_destroy__ = _beast.delete_VectorDoubles
+    __del__ = lambda self: None
+VectorDoubles_swigregister = _beast.VectorDoubles_swigregister
+VectorDoubles_swigregister(VectorDoubles)
 
 # This file is compatible with both classic and new-style classes.
 
