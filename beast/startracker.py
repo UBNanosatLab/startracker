@@ -89,6 +89,8 @@ if __name__ == '__main__':
 		image_stars_info = extract_stars(cv2.imread(img_name))
 		star_points=xyz_points(image_stars_info)
 		sq=identify_stars(image_stars_info,star_points)
+		print star_query.search_rel()
+		print [i for i in star_query.winner_id_map]
 		if len(sq)>1:
 			A=np.array([[i[0],i[1],i[2]] for i in sq])
 			B=np.array([[i[3],i[4],i[5]] for i in sq])
