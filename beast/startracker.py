@@ -58,6 +58,7 @@ def identify_stars(image_stars_info,star_points=[]):
 		star_points = xyz_points(image_stars_info)
 
 	image_stars_info=np.array(image_stars_info)
+	star_ids=[]
 	try:
 		star_query.flip()
 		for i in image_stars_info:
