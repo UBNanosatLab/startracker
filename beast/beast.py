@@ -368,8 +368,8 @@ class star_query(_object):
     def add_score(self, db_const, newid1, newid2):
         return _beast.star_query_add_score(self, db_const, newid1, newid2)
 
-    def add_score_rel(self, oldid1, oldid2, newid1, newid2):
-        return _beast.star_query_add_score_rel(self, oldid1, oldid2, newid1, newid2)
+    def add_score_rel(self, old_const, newid1, newid2):
+        return _beast.star_query_add_score_rel(self, old_const, newid1, newid2)
 
     def search(self):
         return _beast.star_query_search(self)

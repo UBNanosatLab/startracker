@@ -8611,37 +8611,36 @@ fail:
 SWIGINTERN PyObject *_wrap_star_query_add_score_rel(PyObject *SWIGUNUSEDPARM(self), PyObject *args) {
   PyObject *resultobj = 0;
   beast::star_query *arg1 = (beast::star_query *) 0 ;
-  unsigned char arg2 ;
+  beast::constellation *arg2 = 0 ;
   unsigned char arg3 ;
   unsigned char arg4 ;
-  unsigned char arg5 ;
   void *argp1 = 0 ;
   int res1 = 0 ;
-  unsigned char val2 ;
-  int ecode2 = 0 ;
+  void *argp2 = 0 ;
+  int res2 = 0 ;
   unsigned char val3 ;
   int ecode3 = 0 ;
   unsigned char val4 ;
   int ecode4 = 0 ;
-  unsigned char val5 ;
-  int ecode5 = 0 ;
   PyObject * obj0 = 0 ;
   PyObject * obj1 = 0 ;
   PyObject * obj2 = 0 ;
   PyObject * obj3 = 0 ;
-  PyObject * obj4 = 0 ;
   
-  if (!PyArg_ParseTuple(args,(char *)"OOOOO:star_query_add_score_rel",&obj0,&obj1,&obj2,&obj3,&obj4)) SWIG_fail;
+  if (!PyArg_ParseTuple(args,(char *)"OOOO:star_query_add_score_rel",&obj0,&obj1,&obj2,&obj3)) SWIG_fail;
   res1 = SWIG_ConvertPtr(obj0, &argp1,SWIGTYPE_p_beast__star_query, 0 |  0 );
   if (!SWIG_IsOK(res1)) {
     SWIG_exception_fail(SWIG_ArgError(res1), "in method '" "star_query_add_score_rel" "', argument " "1"" of type '" "beast::star_query *""'"); 
   }
   arg1 = reinterpret_cast< beast::star_query * >(argp1);
-  ecode2 = SWIG_AsVal_unsigned_SS_char(obj1, &val2);
-  if (!SWIG_IsOK(ecode2)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode2), "in method '" "star_query_add_score_rel" "', argument " "2"" of type '" "unsigned char""'");
-  } 
-  arg2 = static_cast< unsigned char >(val2);
+  res2 = SWIG_ConvertPtr(obj1, &argp2, SWIGTYPE_p_beast__constellation,  0 );
+  if (!SWIG_IsOK(res2)) {
+    SWIG_exception_fail(SWIG_ArgError(res2), "in method '" "star_query_add_score_rel" "', argument " "2"" of type '" "beast::constellation &""'"); 
+  }
+  if (!argp2) {
+    SWIG_exception_fail(SWIG_ValueError, "invalid null reference " "in method '" "star_query_add_score_rel" "', argument " "2"" of type '" "beast::constellation &""'"); 
+  }
+  arg2 = reinterpret_cast< beast::constellation * >(argp2);
   ecode3 = SWIG_AsVal_unsigned_SS_char(obj2, &val3);
   if (!SWIG_IsOK(ecode3)) {
     SWIG_exception_fail(SWIG_ArgError(ecode3), "in method '" "star_query_add_score_rel" "', argument " "3"" of type '" "unsigned char""'");
@@ -8652,12 +8651,7 @@ SWIGINTERN PyObject *_wrap_star_query_add_score_rel(PyObject *SWIGUNUSEDPARM(sel
     SWIG_exception_fail(SWIG_ArgError(ecode4), "in method '" "star_query_add_score_rel" "', argument " "4"" of type '" "unsigned char""'");
   } 
   arg4 = static_cast< unsigned char >(val4);
-  ecode5 = SWIG_AsVal_unsigned_SS_char(obj4, &val5);
-  if (!SWIG_IsOK(ecode5)) {
-    SWIG_exception_fail(SWIG_ArgError(ecode5), "in method '" "star_query_add_score_rel" "', argument " "5"" of type '" "unsigned char""'");
-  } 
-  arg5 = static_cast< unsigned char >(val5);
-  (arg1)->add_score_rel(arg2,arg3,arg4,arg5);
+  (arg1)->add_score_rel(*arg2,arg3,arg4);
   resultobj = SWIG_Py_Void();
   return resultobj;
 fail:

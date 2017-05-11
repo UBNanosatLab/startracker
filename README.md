@@ -1,9 +1,10 @@
 
-###Basic setup:
+### Basic setup:
 
-#####From a fresh xubuntu 16.04 linux install
+##### From a fresh xubuntu 16.04 linux install
 ~~~~
-sudo apt-get install git libvte-dev libtool ctags gdb meld nemiver libwebkit-dev vim geany geany-plugins astrometry.net python-astropy python-scipy libopencv-dev python-opencv g++-multilib swig
+sudo apt-get install git libvte-dev libtool ctags gdb meld nemiver libwebkit-dev vim geany geany-plugins astrometry.net python-astropy  g++-multilib
+sudo apt-get install python-scipy libopencv-dev python-opencv swig
 cd /usr/share/astrometry
 sudo wget http://data.astrometry.net/4200/index-4212.fits
 sudo wget http://data.astrometry.net/4100/index-4116.fits

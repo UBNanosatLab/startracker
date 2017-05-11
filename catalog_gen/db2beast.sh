@@ -1,6 +1,5 @@
 #!/bin/bash
 source calibration/calibration.txt
-python gendb.py calibration/stars.txt calibration/constellations.txt calibration/dbsize.txt
 
 source calibration/dbsize.txt
 cat calibration/dbsize.txt

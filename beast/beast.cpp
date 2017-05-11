@@ -421,10 +421,10 @@ namespace beast {
 			for(int n=0;n<numnewstars;n++) cs.totalscore+=cs.scores[n];
 			c_scores.push_back(cs);
 		}
-		void __attribute__ ((used)) add_score_rel(unsigned char oldid1,unsigned char oldid2,unsigned char newid1,unsigned char newid2){
+		void __attribute__ ((used)) add_score_rel(constellation &old_const,unsigned char newid1,unsigned char newid2){
 			constellation_score cs;
-			cs.oldid1=oldid1;
-			cs.oldid2=oldid2;
+			cs.oldid1=old_const.s1;
+			cs.oldid2=old_const.s1;
 			cs.newid1=newid1;
 			cs.newid2=newid2;
 			
@@ -532,7 +532,8 @@ namespace beast {
 				int oldid2=c_scores[0].oldid2;
 				unsigned char newid1=c_scores[0].newid1;
 				unsigned char newid2=c_scores[0].newid2;
-				
+				//set attitude matrix to best match
+				weighted_triad(starptr[oldid1],starptr[oldid2],newstars[newid1],newstars[newid2],POS_VARIANCE);
 				for(unsigned int i=1;i<c_scores.size();i++) {
 					if (c_scores[i].id_map[newid1]!=oldid1&&c_scores[i].id_map[newid2]!=oldid2){
 						p_match+=exp(c_scores[i].totalscore-bestscore);
@@ -619,9 +620,9 @@ namespace beast {
 					for (int constidx=map_rel[mmi];constidx!=-1;constidx=constptr_rel[constidx].last) {
 						if (fabs(constptr_rel[constidx].p-p)<ARC_ERR_REL){
 							weighted_triad(oldstars[constptr_rel[constidx].s1],oldstars[constptr_rel[constidx].s2],newstars[j],newstars[i],POS_VARIANCE_REL);
-							add_score_rel(constptr_rel[constidx].s1,constptr_rel[constidx].s2,j,i);
+							add_score_rel(constptr_rel[constidx],j,i);
 							weighted_triad(oldstars[constptr_rel[constidx].s1],oldstars[constptr_rel[constidx].s2],newstars[i],newstars[j],POS_VARIANCE_REL);
-							add_score_rel(constptr_rel[constidx].s1,constptr_rel[constidx].s2,i,j);
+							add_score_rel(constptr_rel[constidx],i,j);
 						}
 					}
 				}
@@ -645,6 +646,8 @@ namespace beast {
 				int oldid2=c_scores[0].oldid2;
 				unsigned char newid1=c_scores[0].newid1;
 				unsigned char newid2=c_scores[0].newid2;
+				//set attitude matrix to best match
+				weighted_triad(starptr[oldid1],starptr[oldid2],newstars[newid1],newstars[newid2],POS_VARIANCE);
 				
 				for(unsigned int i=1;i<c_scores.size();i++) {
 					if (c_scores[i].id_map[newid1]!=oldid1&&c_scores[i].id_map[newid2]!=oldid2){

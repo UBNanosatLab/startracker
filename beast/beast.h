@@ -88,7 +88,7 @@ namespace beast
 		void weighted_triad(star &old_s1,star &old_s2,star &new_s1,star &new_s2,double variance);
 		void set_mask(int x, int y, int id, double score, double variance);
 		void add_score(constellation &db_const,unsigned char newid1,unsigned char newid2);
-		void add_score_rel(unsigned char oldid1,unsigned char oldid2,unsigned char newid1,unsigned char newid2);
+		void add_score_rel(constellation &old_const,unsigned char newid1,unsigned char newid2);
 		double search();
 		double search_rel();
 	};

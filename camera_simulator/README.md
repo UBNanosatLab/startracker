@@ -7,8 +7,8 @@ Run this code
 
 ###Now run these 
 
-`sudo pip install PyOpenGL PyOpenGL_accelerate "PyVRML97==2.3.0a4" simpleparse numpy "OpenGLContext==2.2.0a3"`  
-`sudo pip install pillow PyDispatcher PyVRML97 OpenGLContext`
+`sudo -H pip install PyOpenGL PyOpenGL_accelerate "PyVRML97==2.3.0a4" simpleparse numpy "OpenGLContext==2.2.0a3"`  
+`sudo -H pip install pillow PyDispatcher PyVRML97 OpenGLContext`
 
 I you are using Linux run this code
 

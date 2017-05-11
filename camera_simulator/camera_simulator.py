@@ -21,7 +21,7 @@ Objects.main()
 
 host = 'jeb.eng.buffalo.edu' 
 port = 7008 
-size = 1024 
+size = 16384
 
 #view_distance = 5*6781000/6367444.7 #5*orbit height/ earth radius
 view_distance = 6
@@ -38,8 +38,7 @@ def draw():
 	s.connect((host,port)) 
 	data = s.recv(size).split()
 	s.close()
-
-	body2ECI=np.array(data[5].split(",")).astype(np.float).reshape((3, 3))
+	body2ECI=np.array(data[8].split(",")).astype(np.float).reshape((3, 3))
 	#rotation about the y axis (-90 to +90)
 	DEC=np.degrees(np.arcsin(body2ECI[0,2]))+view_angle[0]
 	#rotation about the z axis (-180 to +180)

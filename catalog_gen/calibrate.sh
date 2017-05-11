@@ -32,3 +32,6 @@ python ../star_corr.py *.solved>>calibration.txt
 source calibration.txt
 echo "ARC_ERR_REL=$ARC_ERR" >>calibration.txt
 echo "POS_VARIANCE_REL=$POS_VARIANCE" >>calibration.txt
+source calibration.txt
+cd ..
+python gendb.py calibration/stars.txt calibration/constellations.txt calibration/dbsize.txt
