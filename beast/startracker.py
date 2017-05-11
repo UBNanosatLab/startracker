@@ -94,7 +94,7 @@ if __name__ == '__main__':
 			weights=np.array([i[6] for i in sq])
 			R=rigid_transform_3D(A,B,weights)
 			#R2=np.array([[star_query.R11,star_query.R12,star_query.R13],[star_query.R21,star_query.R22,star_query.R23],[star_query.R31,star_query.R32,star_query.R33]])
-			body2ECI_RA_DEC_ORI(R2)
+			#body2ECI_RA_DEC_ORI(R2)
 		print img_name
 		print "Time: "+str(time() - starttime)
 		sys.stdout.flush()
