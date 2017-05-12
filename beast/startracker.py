@@ -58,6 +58,7 @@ def identify_stars(image_stars_info,star_points=[]):
 		star_points = xyz_points(image_stars_info)
 
 	image_stars_info=np.array(image_stars_info)
+	star_ids=[]
 	try:
 		star_query.flip()
 		for i in image_stars_info:
@@ -88,13 +89,15 @@ if __name__ == '__main__':
 		image_stars_info = extract_stars(cv2.imread(img_name))
 		star_points=xyz_points(image_stars_info)
 		sq=identify_stars(image_stars_info,star_points)
+		print star_query.search_rel()
+		print [i for i in star_query.winner_id_map]
 		if len(sq)>1:
 			A=np.array([[i[0],i[1],i[2]] for i in sq])
 			B=np.array([[i[3],i[4],i[5]] for i in sq])
 			weights=np.array([i[6] for i in sq])
 			R=rigid_transform_3D(A,B,weights)
 			#R2=np.array([[star_query.R11,star_query.R12,star_query.R13],[star_query.R21,star_query.R22,star_query.R23],[star_query.R31,star_query.R32,star_query.R33]])
-			body2ECI_RA_DEC_ORI(R2)
+			#body2ECI_RA_DEC_ORI(R2)
 		print img_name
 		print "Time: "+str(time() - starttime)
 		sys.stdout.flush()

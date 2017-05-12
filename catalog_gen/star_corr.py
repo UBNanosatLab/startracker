@@ -68,7 +68,8 @@ def get_ref_magnitude(solved_file,outputimg=0):
 				x=int((star_match_cel[1]/star_match_cel[0])*(IMG_X/2)/np.tan(DEG_X*np.pi/(180*2)))+IMG_X/2
 				y=int((star_match_cel[2]/star_match_cel[0])*(IMG_Y/2)/np.tan(DEG_Y*np.pi/(180*2)))+IMG_Y/2
 				cv2.circle(img,(x,y),int(PSF_RADIUS),(0,255,0))
-
+	if len(A)<2:
+		return([],[],[])
 	attitude_matrix=rigid_transform_3D(np.array(A),np.array(B))
 	err=np.dot(A,attitude_matrix)-B
 	#average error in arcseconds
