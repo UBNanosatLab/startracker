@@ -73,7 +73,8 @@ def identify_stars(image_stars_info,star_points=[]):
 if __name__ == '__main__':
 	if len(sys.argv)>1:
 		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		s.bind(("127.0.0.1", sys.argv[1]))
+		servPort = int(sys.argv[1])
+		s.bind(("127.0.0.1", servPort))
 		s.listen(1)
 	while True:
 		try:
