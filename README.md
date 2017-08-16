@@ -6,7 +6,7 @@
 sudo apt-get install git libvte-dev libtool ctags gdb meld nemiver libwebkit-dev vim geany geany-plugins astrometry.net python-astropy  g++-multilib
 sudo apt-get install python-scipy libopencv-dev python-opencv swig
 cd /usr/share/astrometry
-sudo wget http://data.astrometry.net/4200/index-4212.fits
+sudo wget http://data.astrometry.net/4100/index-4112.fits
 sudo wget http://data.astrometry.net/4100/index-4116.fits
 sudo wget http://data.astrometry.net/4100/index-4117.fits
 sudo wget http://data.astrometry.net/4100/index-4118.fits
