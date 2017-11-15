@@ -33,11 +33,14 @@ def draw():
 	longitude = -78.878372 
 	#RESET ALL----------------------------------------
 	glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT)
-
-	s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-	s.connect((host,port)) 
-	data = s.recv(size).split()
-	s.close()
+	while True:
+		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		s.connect((host,port)) 
+		data = s.recv(size).split()
+		s.close()
+		if len(data)!=12:
+			continue
+		break
 	body2ECI=np.array(data[8].split(",")).astype(np.float).reshape((3, 3))
 	#rotation about the y axis (-90 to +90)
 	DEC=np.degrees(np.arcsin(body2ECI[0,2]))+view_angle[0]
