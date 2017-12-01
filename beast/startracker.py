@@ -72,7 +72,6 @@ def identify_stars(image_stars_info,star_points=[]):
 
 
 def do_solve(image_stars_info,txt_name):
-		
 		starttime=time()
 		star_points=xyz_points(image_stars_info)
 		sq=identify_stars(image_stars_info,star_points)
