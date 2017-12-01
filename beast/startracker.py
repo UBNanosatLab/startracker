@@ -70,25 +70,10 @@ def identify_stars(image_stars_info,star_points=[]):
 		
 	return [star_points[i[1]]+stardb[i[2]][4:7]+i for i in star_ids]
 
-if __name__ == '__main__':
-	if len(sys.argv)>1:
-		s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-		servPort = int(sys.argv[1])
-		s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-		s.bind(("127.0.0.1", servPort))
-		s.listen(1)
-	while True:
-		try:
-			if len(sys.argv)>1:
-				conn, addr = s.accept()
-				img_name = conn.recv(1024).rstrip()
-			else:
-				img_name=raw_input().rstrip()
-		except EOFError:
-			break
-		if (img_name==''): break
+
+def do_solve(image_stars_info):
+		
 		starttime=time()
-		image_stars_info = extract_stars(cv2.imread(img_name))
 		star_points=xyz_points(image_stars_info)
 		sq=identify_stars(image_stars_info,star_points)
 		print star_query.search_rel()
@@ -100,10 +85,77 @@ if __name__ == '__main__':
 			R=rigid_transform_3D(A,B,weights)
 			#R2=np.array([[star_query.R11,star_query.R12,star_query.R13],[star_query.R21,star_query.R22,star_query.R23],[star_query.R31,star_query.R32,star_query.R33]])
 			#body2ECI_RA_DEC_ORI(R2)
-		print img_name
 		print "Time: "+str(time() - starttime)
 		sys.stdout.flush()
-		data=" ".join([str(i[0])+","+str(i[1])+","+str(i[2])+","+str(i[3])+","+str(i[4])+","+str(i[5])+","+str(i[6]) for i in sq])
-		if len(sys.argv)>1:
-			conn.sendall(data+"\r\n")
-			conn.close()
+		return i
+		
+if __name__ == '__main__':
+	if len(sys.argv)==2:
+		import socket,select, os
+		epoll = select.epoll()
+		server_ir=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		server_ir.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+		server_ir.bind(('127.0.0.1', int(sys.argv[1])))
+		server_ir.listen(5)
+		server_ir.setblocking(0)
+		epoll.register(server_ir.fileno(), select.EPOLLIN)
+
+		server_rgb=socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+		server_rgb.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+		server_rgb.bind(('127.0.0.1', int(sys.argv[2])))
+		server_rgb.listen(5)
+		server_rgb.setblocking(0)
+		epoll.register(server_rgb.fileno(), select.EPOLLIN)
+
+		conn_rgb_fd=-1
+		conn_ir_fd=-1
+		image_stars_info = []
+		image_ir=[]
+		image_rgb=[]
+
+		while True:
+			events = epoll.poll()
+			for fd, event_type in events:
+				if fd==server_ir.fileno():
+					conn_ir, addr=server_ir.accept()
+					conn_ir_fd=conn_ir.fileno()
+					epoll.register(conn_ir_fd, select.EPOLLIN)
+				if fd==conn_ir_fd:
+					if (event_type&select.EPOLLIN)>0:
+						img_name = os.read(conn_ir_fd, 1024)
+						if len(data)>0:
+							image_ir=cv2.imread(img_name)
+							image_stars_info = extract_stars(cv2.imread(img_name))
+							i=solve_img(image_stars_info)
+							output_ir=data=" ".join([str(i[0])+","+str(i[1])+","+str(i[2])+","+str(i[3])+","+str(i[4])+","+str(i[5])+","+str(i[6]) for i in sq])
+							os.write(conn_ir_fd, output_ir)
+						else:
+							epoll.unregister(conn_ir_fd)
+							conn_ir.close()
+							conn_ir_fd=-1
+
+				if fd==server_rgb.fileno():
+					conn_rgb, addr=server_rgb.accept()
+					conn_rgb_fd=conn_rgb.fileno()
+					epoll.register(conn_rgb_fd, select.EPOLLIN)
+				if fd==conn_rgb_fd:
+					if (event_type&select.EPOLLIN)>0:
+						img_name = os.read(conn_rgb_fd, 1024)
+						if len(data)>0:
+							image_rgb=cv2.imread(img_name)
+							os.write(conn_rgb_fd, img_name+".txt")
+						else:
+							epoll.unregister(conn_rgb_fd)
+							conn_rgb.close()
+							conn_rgb_fd=-1
+
+	else:
+		while True:
+			try:
+				img_name=raw_input().rstrip()
+				if (img_name==''): break
+				print img_name
+				image_stars_info = extract_stars(cv2.imread(img_name))
+				do_solve(image_stars_info)
+			except EOFError:
+				break
