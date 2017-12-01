@@ -71,13 +71,18 @@ def identify_stars(image_stars_info,star_points=[]):
 	return [star_points[i[1]]+stardb[i[2]][4:7]+i for i in star_ids]
 
 
-def do_solve(image_stars_info):
+def do_solve(image_stars_info,txt_name):
 		
 		starttime=time()
 		star_points=xyz_points(image_stars_info)
 		sq=identify_stars(image_stars_info,star_points)
-		print star_query.search_rel()
-		print [i for i in star_query.winner_id_map]
+		
+		f = open(txt_name,'a')
+		data=star_query.search_rel()
+		print >>f, data
+		print >>f, [i for i in star_query.winner_id_map]
+		f.close()
+		
 		if len(sq)>1:
 			A=np.array([[i[0],i[1],i[2]] for i in sq])
 			B=np.array([[i[3],i[4],i[5]] for i in sq])
@@ -113,6 +118,7 @@ if __name__ == '__main__':
 		image_ir=[]
 		image_rgb=[]
 
+		txt_name=''
 		while True:
 			events = epoll.poll()
 			for fd, event_type in events:
@@ -123,10 +129,11 @@ if __name__ == '__main__':
 				if fd==conn_ir_fd:
 					if (event_type&select.EPOLLIN)>0:
 						img_name = os.read(conn_ir_fd, 1024)
+						txt_name=img_name+'.txt'
 						if len(data)>0:
 							image_ir=cv2.imread(img_name)
 							image_stars_info = extract_stars(cv2.imread(img_name))
-							i=solve_img(image_stars_info)
+							i=solve_img(image_stars_info,img_name)
 							output_ir=data=" ".join([str(i[0])+","+str(i[1])+","+str(i[2])+","+str(i[3])+","+str(i[4])+","+str(i[5])+","+str(i[6]) for i in sq])
 							os.write(conn_ir_fd, output_ir)
 						else:
@@ -143,7 +150,16 @@ if __name__ == '__main__':
 						img_name = os.read(conn_rgb_fd, 1024)
 						if len(data)>0:
 							image_rgb=cv2.imread(img_name)
-							os.write(conn_rgb_fd, img_name+".txt")
+							#TODO: relative matching between rgb and ir image (since the cameras are probably not perfectly aligned)
+							cx=image_stars_info[:,0]+IMG_X/2
+							cy=image_stars_info[:,1]+IMG_Y/2
+							
+							f = open(txt_name,'a')
+							print >>f, cv2.getRectSubPix(image_ir,(1,1),(cx,cy))
+							print >>f, cv2.getRectSubPix(image_rgb,(1,1),(cx,cy))
+							f.close()
+							
+							os.write(conn_rgb_fd,txt_name)
 						else:
 							epoll.unregister(conn_rgb_fd)
 							conn_rgb.close()
@@ -156,6 +172,6 @@ if __name__ == '__main__':
 				if (img_name==''): break
 				print img_name
 				image_stars_info = extract_stars(cv2.imread(img_name))
-				do_solve(image_stars_info)
+				do_solve(image_stars_info,'/dev/stdout')
 			except EOFError:
 				break
