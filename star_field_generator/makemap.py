@@ -6,13 +6,13 @@ import sys
 
 def mag2val(mag,refmag,refval):
 	magconst=refmag+2.5*math.log10(refval)
-	val=10**((mag-magconst)/-2.5)
+	val=int(round(10**((mag-magconst)/-2.5)))
 	if val > 255:
 		val=255
 	return val
 
-imagex=1024*int(sys.argv[1])*4
-imagey=1024*int(sys.argv[1])*2
+imagex=512*int(sys.argv[1])*4
+imagey=512*int(sys.argv[1])*2
 
 im=Image.new("L", (imagex,imagey))
 starfile = open("catalog.dat")
@@ -22,13 +22,14 @@ for line in starfile.readlines():
     dec=float(star[3])
     mag=float(star[1])
     
-    brightness=mag2val(mag,7.5,10)
+    brightness=mag2val(mag,7.5,10.0)
     
     pixelx=(360.0-ra)*imagex/360
     pixely=(90.0-dec)*imagey/180
     distortion=1/math.cos(math.radians(dec))
 
     for x in range(int(round(pixelx-distortion/2)), int(round(pixelx+distortion/2))):
+        print brightness
         im.putpixel((x%imagex, int(round(pixely))),brightness)
 
 im.save("starmap.png", "PNG")
