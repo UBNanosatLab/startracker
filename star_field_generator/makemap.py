@@ -29,7 +29,6 @@ for line in starfile.readlines():
     distortion=1/math.cos(math.radians(dec))
 
     for x in range(int(round(pixelx-distortion/2)), int(round(pixelx+distortion/2))):
-        print brightness
         im.putpixel((x%imagex, int(round(pixely))),brightness)
 
 im.save("starmap.png", "PNG")

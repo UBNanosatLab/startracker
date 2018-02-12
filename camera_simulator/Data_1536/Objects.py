@@ -119,5 +119,5 @@ def main():
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
     Sphere2 = gluNewQuadric()
     gluQuadricTexture(Sphere2, GL_TRUE)
-    gluSphere(Sphere2, .025, 10, 10)
+    gluSphere(Sphere2, .002, 10, 10)
     glEndList()

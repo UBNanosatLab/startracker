@@ -255,12 +255,16 @@ def get_input():
 
 def main():
 	curtime=time()
+	lasttime=curtime+1
+	#clear screen
+	print "\033[2J"
 	while True:
-		os.system("clear")
+		#put cursor to top
+		print "\033[2J\033[0;0H"
+		print "fps: "+str(1.0/(curtime-lasttime))
 		get_input()
 		draw()
 		#sleep(.25)
 		lasttime=curtime
 		curtime=time()
-		print "fps: "+str(1.0/(curtime-lasttime))
 if __name__ == "__main__": main()
