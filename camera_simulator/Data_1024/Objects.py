@@ -12,7 +12,7 @@ def resize((width, height)):
     glViewport(0, 0, width, height)
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
-    gluPerspective(24.0, float(width)/height, .1, 1000.)
+    gluPerspective(16.0, float(width)/height, .1, 1000.)
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
 

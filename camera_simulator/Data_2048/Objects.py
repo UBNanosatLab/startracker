@@ -12,7 +12,7 @@ def resize((width, height)):
     glViewport(0, 0, width, height)
     glMatrixMode(GL_PROJECTION)
     glLoadIdentity()
-    gluPerspective(32.0, float(width)/height, .1, 1000.)
+    gluPerspective(16.0, float(width)/height, .1, 1000.)
     glMatrixMode(GL_MODELVIEW)
     glLoadIdentity()
 
@@ -119,5 +119,5 @@ def main():
     glTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR)
     Sphere2 = gluNewQuadric()
     gluQuadricTexture(Sphere2, GL_TRUE)
-    gluSphere(Sphere2, .025, 10, 10)
+    gluSphere(Sphere2, .002, 10, 10)
     glEndList()
