@@ -1,5 +1,8 @@
+Note: the startracker code in this repository is depricated. Use https://github.com/UBNanosatLab/openstartracker instead
 
-### Basic setup:
+For starfield simulation, see the readme in the camera_simulator subdirectory. The code is embarasingly bad and requires gigabytes of GPU memory for absolutely no reason. It is in desperate need of a rewrite, however I am making it avalible due to public interest
+
+## Basic setup:
 
 ##### From a fresh xubuntu 16.04 linux install
 ~~~~
